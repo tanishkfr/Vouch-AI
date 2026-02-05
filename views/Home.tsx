@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Zap, Users, Lock, Database, FileSearch, ArrowDown, BrainCircuit, RefreshCcw, SearchCheck, HeartHandshake } from 'lucide-react';
+import { ShieldCheck, Zap, Users, Lock, Database, FileSearch, ArrowDown, BrainCircuit, RefreshCcw, SearchCheck, HeartHandshake, Brain, Fingerprint, Activity, Shield, Eye } from 'lucide-react';
 import { Button } from '../components/Button';
 
 // Simplified Lock Graphic
@@ -28,9 +28,26 @@ export const Home: React.FC<{ setPage: (page: any) => void }> = ({ setPage }) =>
         </div>
 
         <div className="max-w-7xl mx-auto z-10 space-y-12">
-           <div className="inline-flex items-center gap-3 bg-black/20 backdrop-blur-md px-6 py-3 rounded-full border border-black/10 text-[#1A1A1A] font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all cursor-pointer shadow-lg hover:scale-105">
-              <span className="w-3 h-3 bg-white rounded-full animate-ping"></span>
-              The Integrity Engine
+           
+           {/* MULTI-CHIP FEATURE ROW */}
+           <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-4 animate-in slide-in-from-bottom-4 fade-in duration-1000">
+                {/* Chip 1: AI Analysis */}
+                <div className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/5 bg-white/10 backdrop-blur-md text-[10px] md:text-xs font-black uppercase tracking-widest text-[#1A1A1A] hover:bg-white/25 transition-all cursor-default shadow-sm hover:scale-105">
+                    <Brain size={14} />
+                    <span>AI-Powered Analysis</span>
+                </div>
+                
+                {/* Chip 2: Integrity Engine */}
+                <div className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/5 bg-white/10 backdrop-blur-md text-[10px] md:text-xs font-black uppercase tracking-widest text-[#1A1A1A] hover:bg-white/25 transition-all cursor-default shadow-sm hover:scale-105">
+                    <Fingerprint size={14} />
+                    <span>The Integrity Engine</span>
+                </div>
+
+                {/* Chip 3: Real-Time Alerts */}
+                <div className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/5 bg-white/10 backdrop-blur-md text-[10px] md:text-xs font-black uppercase tracking-widest text-[#1A1A1A] hover:bg-white/25 transition-all cursor-default shadow-sm hover:scale-105">
+                    <Activity size={14} />
+                    <span>Real-Time Alerts</span>
+                </div>
            </div>
 
            <h1 className="text-[14vw] md:text-[10rem] font-black text-[#1A1A1A] leading-[0.8] tracking-tighter drop-shadow-sm mix-blend-multiply animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-200">
@@ -165,20 +182,40 @@ export const Home: React.FC<{ setPage: (page: any) => void }> = ({ setPage }) =>
          <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
          <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/20 rounded-full blur-3xl -ml-32 -mb-32"></div>
 
-         <div className="max-w-5xl mx-auto text-center relative z-10">
+         <div className="max-w-6xl mx-auto text-center relative z-10">
              <div className="w-24 h-24 bg-[#1A1A1A] text-white rounded-full flex items-center justify-center mx-auto mb-10 shadow-[8px_8px_0px_white]">
                  <HeartHandshake size={48} />
              </div>
              <h2 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-none">
                  HONESTY IS THE <br/> NEW <span className="text-white drop-shadow-md">VIRALITY.</span>
              </h2>
-             <p className="text-2xl md:text-3xl font-bold max-w-3xl mx-auto leading-tight mb-12">
+             <p className="text-2xl md:text-3xl font-bold max-w-3xl mx-auto leading-tight mb-16">
                  Audiences don't want perfection. They want ownership. Being transparent about corrections builds a 3x stronger connection than pretending to be flawless.
              </p>
-             <div className="inline-flex items-center gap-4 bg-white px-8 py-4 rounded-full border-4 border-[#1A1A1A] shadow-[8px_8px_0px_#1A1A1A]">
-                 <span className="font-black uppercase tracking-widest text-lg">Integrity First</span>
-                 <ShieldCheck className="text-[#F0543C]" size={28} />
+             
+             {/* CHIPS ROW */}
+             <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full">
+                 
+                 {/* Left Chip: Verified Source */}
+                 <div className="group bg-white px-6 py-3 rounded-full border-2 border-transparent hover:border-[#E86D44]/20 shadow-[2px_2px_0px_#1A1A1A] hover:shadow-[4px_4px_0px_#1A1A1A] hover:-translate-y-1 transition-all duration-200 cursor-default flex items-center gap-3">
+                     <Shield size={20} className="text-[#E86D44]" />
+                     <span className="font-black text-[#E86D44] text-xs md:text-sm uppercase tracking-widest">Verified Source</span>
+                 </div>
+
+                 {/* Center Element: Integrity First - UPDATED STYLE */}
+                 <div className="group bg-white px-6 py-3 rounded-full border-2 border-transparent hover:border-[#E86D44]/20 shadow-[2px_2px_0px_#1A1A1A] hover:shadow-[4px_4px_0px_#1A1A1A] hover:-translate-y-1 transition-all duration-200 cursor-default flex items-center gap-3">
+                     <ShieldCheck size={20} className="text-[#E86D44]" />
+                     <span className="font-black text-[#E86D44] text-xs md:text-sm uppercase tracking-widest">Integrity First</span>
+                 </div>
+
+                 {/* Right Chip: Transparent AI */}
+                 <div className="group bg-white px-6 py-3 rounded-full border-2 border-transparent hover:border-[#E86D44]/20 shadow-[2px_2px_0px_#1A1A1A] hover:shadow-[4px_4px_0px_#1A1A1A] hover:-translate-y-1 transition-all duration-200 cursor-default flex items-center gap-3">
+                     <Eye size={20} className="text-[#E86D44]" />
+                     <span className="font-black text-[#E86D44] text-xs md:text-sm uppercase tracking-widest">Transparent AI</span>
+                 </div>
+
              </div>
+
          </div>
       </section>
 

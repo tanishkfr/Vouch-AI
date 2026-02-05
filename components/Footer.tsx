@@ -1,13 +1,56 @@
 import React, { useState } from 'react';
-import { Twitter, Instagram, Linkedin, ArrowRight, Check, Globe } from 'lucide-react';
+import { Twitter, Instagram, Linkedin, ArrowRight, Check, Globe, Wifi } from 'lucide-react';
+import { ModalConfig } from '../types';
 
-export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: string }> = ({ setPage, activePage }) => {
+interface FooterProps { 
+    setPage: (page: any) => void; 
+    activePage?: string;
+    openModal: (config: Omit<ModalConfig, 'isOpen'>) => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ setPage, activePage, openModal }) => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleLinkClick = (e: React.MouseEvent, name: string) => {
-    e.preventDefault();
-    alert(`${name} View Coming Soon (Legal Mock)`);
+  const handleNavigate = (page: string) => {
+    setPage(page);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleComingSoon = (feature: string) => {
+      openModal({
+          title: `${feature} - Coming Soon`,
+          type: 'coming-soon',
+          content: (
+              <div className="text-center py-4">
+                  <p className="mb-4">We are currently scaling our infrastructure to support <strong>{feature}</strong>.</p>
+                  <p>This feature is slated for the <strong>Q3 2026</strong> release cycle.</p>
+                  <div className="mt-6 p-4 bg-gray-100 rounded-xl border border-gray-200 text-sm font-mono text-gray-500">
+                      STATUS: DEVELOPMENT_PENDING
+                  </div>
+              </div>
+          )
+      });
+  };
+
+  const handleLegal = (doc: string) => {
+      openModal({
+          title: `Legal - ${doc}`,
+          type: 'legal',
+          content: (
+              <div className="space-y-4 text-sm">
+                  <p><strong>Last Updated: October 24, 2025</strong></p>
+                  <p>This is a demonstration of the VOUCH Integrity Engine. By using this interface, you acknowledge that this is a prototype environment.</p>
+                  <p>No real data is stored permanently. Audio files are processed in a volatile memory sandbox and purged immediately upon session closure.</p>
+                  <h4 className="font-bold text-[#1A1A1A] mt-4">Data Processing</h4>
+                  <ul className="list-disc pl-5 space-y-1">
+                      <li>Audio fingerprinting is performed locally where possible.</li>
+                      <li>Cloud processing uses ephemeral instances.</li>
+                      <li>We do not sell, trade, or store your voice prints.</li>
+                  </ul>
+              </div>
+          )
+      });
   };
 
   const handleSubscribe = () => {
@@ -79,10 +122,10 @@ export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: strin
             <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#F0543C] mb-4">Discover</h3>
                 <ul className="space-y-4 font-bold text-gray-400 text-sm">
-                    <li><button onClick={() => setPage('home')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Home</button></li>
-                    <li><button onClick={() => setPage('spectrum')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">The Spectrum</button></li>
-                    <li><button onClick={() => setPage('studio')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">The Studio</button></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Pricing')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Pricing</a></li>
+                    <li><button onClick={() => handleNavigate('home')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Home</button></li>
+                    <li><button onClick={() => handleNavigate('spectrum')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">The Spectrum</button></li>
+                    <li><button onClick={() => handleNavigate('studio')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">The Studio</button></li>
+                    <li><button onClick={() => handleComingSoon('Enterprise Pricing')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Pricing</button></li>
                 </ul>
             </div>
 
@@ -90,10 +133,10 @@ export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: strin
             <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#00E8FF] mb-4">VOUCH Inc</h3>
                 <ul className="space-y-4 font-bold text-gray-400 text-sm">
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'About')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">About Us</a></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Brand')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Brand Kit</a></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Careers')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Careers</a></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Blog')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Blog</a></li>
+                    <li><button onClick={() => handleComingSoon('About Us')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">About Us</button></li>
+                    <li><button onClick={() => handleComingSoon('Brand Kit')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Brand Kit</button></li>
+                    <li><button onClick={() => handleComingSoon('Careers')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Careers</button></li>
+                    <li><button onClick={() => handleComingSoon('Blog')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Blog</button></li>
                 </ul>
             </div>
 
@@ -101,11 +144,17 @@ export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: strin
             <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#FFCF36] mb-4">Support</h3>
                 <ul className="space-y-4 font-bold text-gray-400 text-sm">
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Help')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Help Center</a></li>
-                    <li><button onClick={() => setPage('contact')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Contact Us</button></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Status')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block flex items-center gap-2">
-                        <span className="w-2 h-2 bg-[#7BC65C] rounded-full animate-pulse"></span> System Status
-                    </a></li>
+                    <li><button onClick={() => handleComingSoon('Help Center')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Help Center</button></li>
+                    <li><button onClick={() => handleNavigate('contact')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Contact Us</button></li>
+                    <li>
+                        <div className="flex items-center gap-2 text-[#7BC65C] font-bold cursor-default mt-2">
+                             <div className="relative">
+                                 <div className="w-2.5 h-2.5 bg-[#7BC65C] rounded-full"></div>
+                                 <div className="absolute top-0 left-0 w-full h-full bg-[#7BC65C] rounded-full animate-ping"></div>
+                             </div>
+                             <span className="text-white hover:text-[#7BC65C] transition-colors">All Systems Operational</span>
+                        </div>
+                    </li>
                 </ul>
             </div>
 
@@ -113,9 +162,9 @@ export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: strin
              <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4">Legal</h3>
                 <ul className="space-y-4 font-bold text-gray-400 text-sm">
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Privacy')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Privacy Policy</a></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Terms')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Terms of Service</a></li>
-                    <li><a href="#" onClick={(e) => handleLinkClick(e, 'Security')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Security</a></li>
+                    <li><button onClick={() => handleLegal('Privacy Policy')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Privacy Policy</button></li>
+                    <li><button onClick={() => handleLegal('Terms of Service')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Terms of Service</button></li>
+                    <li><button onClick={() => handleLegal('Security Protocol')} className="hover:text-white transition-colors hover:translate-x-1 duration-200 inline-block">Security</button></li>
                 </ul>
             </div>
 

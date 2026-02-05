@@ -25,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, setPage, user, isAut
             onClick={() => setPage('home')}
           >
             <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center text-white group-hover:rotate-12 transition-transform shadow-md border-2 border-white">
-              <Fingerprint size={20} className="text-[#F0543C]" />
+              <Fingerprint size={20} className="text-[#E86D44]" />
             </div>
             <span className="text-2xl font-black tracking-tighter text-[#1A1A1A] hidden sm:block">VOUCH</span>
           </div>
@@ -50,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, setPage, user, isAut
           {/* Static CTA */}
           <button
             onClick={() => setPage('studio')}
-            className="hidden sm:flex items-center gap-2 bg-[#F0543C] text-white border-[3px] border-[#1A1A1A] px-6 py-2.5 rounded-full font-bold text-base shadow-[4px_4px_0px_#1A1A1A] hover:shadow-[6px_6px_0px_#1A1A1A] hover:translate-y-[-2px] active:translate-y-[2px] active:shadow-none transition-all duration-150 group"
+            className="hidden sm:flex items-center gap-2 bg-[#E86D44] text-white border-[3px] border-[#1A1A1A] px-6 py-2.5 rounded-full font-bold text-base shadow-[4px_4px_0px_#1A1A1A] hover:shadow-[6px_6px_0px_#1A1A1A] hover:translate-y-[-2px] active:translate-y-[2px] active:shadow-none transition-all duration-150 group"
           >
             <Zap className="fill-current group-hover:animate-pulse" size={18} />
             AUDIT

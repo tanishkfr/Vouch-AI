@@ -6,90 +6,92 @@ import { Spectrum } from './views/Spectrum';
 import { Studio } from './views/Studio';
 import { Contact } from './views/Contact';
 import { Profile } from './views/Profile';
-import { StudioState, UserProfile } from './types';
+import { Modal } from './components/Modal';
+import { StudioState, UserProfile, ModalConfig } from './types';
 import { ArrowRight, ShieldCheck, Zap, Activity, Fingerprint, Loader2 } from 'lucide-react';
 
-// --- COMPONENT: NEURAL SCAN SPLASH ---
+// --- ASSET: GOOGLE LOGO ---
+const GoogleIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26.81-.58z" fill="#FBBC05" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+  </svg>
+);
+
+// --- ASSET: APPLE LOGO ---
+const AppleIcon = () => (
+  <svg className="w-5 h-5 fill-current" viewBox="0 0 384 512">
+    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z" />
+  </svg>
+);
+
+// --- ASSET: FINGERPRINT BRAND LOGO ---
+// Updated to EXACTLY match Navbar style: Black circle, white border, orange fingerprint
+const FingerprintBrandLogo = ({ className }: { className?: string }) => (
+  <div className={`bg-[#1A1A1A] rounded-full flex items-center justify-center border-4 md:border-[6px] border-white shadow-sm overflow-hidden ${className}`}>
+    <Fingerprint className="w-[60%] h-[60%] text-[#E86D44]" strokeWidth={2.5} />
+  </div>
+);
+
+// --- COMPONENT: BOUNCY NEURAL SPLASH ---
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const [scanProgress, setScanProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
-  const [statusText, setStatusText] = useState("ESTABLISHING INTEGRITY PATHWAY...");
+  const [statusText, setStatusText] = useState("ESTABLISHING BIOMETRIC INTEGRITY...");
 
   useEffect(() => {
-    const duration = 2500; // 2.5 seconds scan
-    const start = performance.now();
+    // REMOVE STATIC SPLASH IF EXISTS
+    const staticSplash = document.getElementById('fail-safe-splash');
+    if (staticSplash) {
+        staticSplash.style.opacity = '0';
+        setTimeout(() => staticSplash.remove(), 500);
+    }
 
-    const frame = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      setScanProgress(progress * 100);
+    const duration = 2800;
+    
+    // Simulate scan success
+    setTimeout(() => {
+        setStatusText("ESTABLISHING BIOMETRIC INTEGRITY... [SUCCESS]");
+    }, 2000);
 
-      if (progress < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        setStatusText("ESTABLISHING INTEGRITY PATHWAY... [SUCCESS]");
-        // Hold for a moment then slide up
-        setTimeout(() => {
-          setIsExiting(true);
-          setTimeout(onComplete, 800); // Wait for transition to finish
-        }, 600);
-      }
-    };
+    // Trigger exit
+    setTimeout(() => {
+        setIsExiting(true);
+        setTimeout(onComplete, 800); // Wait for transition
+    }, duration);
 
-    requestAnimationFrame(frame);
   }, [onComplete]);
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden transition-transform duration-[800ms] cubic-bezier(0.7, 0, 0.3, 1) ${isExiting ? '-translate-y-full' : 'translate-y-0'}`}
+      className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden transition-all duration-[800ms] cubic-bezier(0.76, 0, 0.24, 1) ${isExiting ? '-translate-y-full opacity-100' : 'translate-y-0 opacity-100'}`}
     >
-      {/* Container for Logo */}
-      <div className="relative w-full max-w-7xl h-[400px] flex items-center justify-center">
-        
-        {/* Layer 1: Glitchy Wireframe (Underneath) */}
-        <div className="absolute inset-0 flex items-center justify-center select-none opacity-40">
-           <h1 
-             className="text-[15vw] md:text-[12rem] font-black tracking-tighter leading-none text-transparent animate-pulse"
-             style={{ 
-               WebkitTextStroke: '2px #E86D44',
-               filter: 'blur(1px)',
-               transform: 'scale(1.02)'
-             }}
-           >
-             VOUCH
-           </h1>
-        </div>
+      {/* Floating Background Elements */}
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#E86D44] rounded-full mix-blend-screen opacity-5 blur-3xl animate-float" style={{ animationDelay: '0s' }}></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#E86D44] rounded-full mix-blend-screen opacity-5 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
 
-        {/* Layer 2: Solid Glowing Reveal (Masked) */}
-        <div 
-            className="absolute inset-0 flex items-center justify-center select-none"
-            style={{ 
-                clipPath: `polygon(0 0, 100% 0, 100% ${scanProgress}%, 0 ${scanProgress}%)`
-            }}
-        >
-            <h1 className="text-[15vw] md:text-[12rem] font-black tracking-tighter leading-none text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.6)]">
-                VOUCH
-            </h1>
-        </div>
+      {/* Centered Brand Stack */}
+      <div className="relative z-30 flex flex-col items-center mb-8">
+          
+          {/* Logo with Bounce & Float */}
+          <div className="animate-bounce-in">
+              <div className="w-32 h-32 md:w-48 md:h-48 mb-8 animate-float">
+                  <FingerprintBrandLogo className="w-full h-full drop-shadow-[0_20px_50px_rgba(232,109,68,0.3)]" />
+              </div>
+          </div>
 
-        {/* The Laser Scanner */}
-        <div 
-            className="absolute left-0 w-full h-[4px] bg-[#F0543C] shadow-[0_0_50px_#F0543C,0_0_20px_#fff] z-20"
-            style={{ 
-                top: `${scanProgress}%`,
-                opacity: scanProgress >= 100 ? 0 : 1,
-                transition: 'opacity 0.2s'
-            }}
-        >
-            <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-[#F0543C]/30 to-transparent pointer-events-none"></div>
-        </div>
-
+          {/* Typography Container */}
+          <div className="relative animate-bounce-in" style={{ animationDelay: '0.2s' }}>
+              <h1 className="text-[15vw] md:text-[12rem] font-black tracking-tighter leading-none text-white drop-shadow-2xl">
+                  VOUCH
+              </h1>
+          </div>
       </div>
 
       {/* Status Text - Monospace */}
-      <div className="absolute bottom-12 left-6 md:left-12 font-mono text-[#F0543C] text-xs md:text-sm font-bold tracking-widest flex items-center gap-3">
-         <span className={`w-2 h-2 bg-[#F0543C] ${scanProgress < 100 ? 'animate-ping' : ''}`}></span>
+      <div className="absolute bottom-12 font-mono text-[#E86D44] text-xs md:text-sm font-bold tracking-widest flex items-center gap-3">
+         <span className="w-2 h-2 bg-[#E86D44] animate-ping"></span>
          {statusText}
       </div>
     </div>
@@ -171,48 +173,45 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
   const [nameInput, setNameInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDirectEntry = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Default login action
+  const handleDefaultLogin = (e?: React.FormEvent) => {
+    e?.preventDefault();
     setIsLoading(true);
     setTimeout(() => {
-        onLogin(nameInput || "Tanishk"); 
+        onLogin(nameInput || "John Doe"); 
     }, 800);
-  };
-
-  const handleSocialLogin = () => {
-      setIsLoading(true);
-      setTimeout(() => {
-        onLogin("Tanishk");
-      }, 800);
   };
 
   return (
     <div className="min-h-screen bg-[#F5F1E6] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Soft Background Blur */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E86D44]/10 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="relative z-10 w-full max-w-md animate-in slide-in-from-bottom-8 fade-in duration-700">
             <div className="bg-white rounded-[2.5rem] shadow-[16px_16px_0px_rgba(26,26,26,0.05)] border-4 border-white p-8 md:p-10 text-center">
                 
                 <div className="flex flex-col items-center mb-10">
-                    <div className="w-16 h-16 bg-[#1A1A1A] rounded-2xl flex items-center justify-center text-[#F0543C] shadow-lg transform -rotate-3 mb-4">
-                        <Fingerprint size={32} />
+                    <div className="w-24 h-24 mb-6 hover:scale-105 transition-transform duration-300">
+                        <FingerprintBrandLogo className="w-full h-full drop-shadow-lg" />
                     </div>
                     <h1 className="text-5xl font-black text-[#1A1A1A] tracking-tighter">VOUCH</h1>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Integrity Engine v1.0</p>
+                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Integrity Engine v2.0</p>
                 </div>
 
                 <div className="space-y-4">
                     <button 
-                        onClick={handleSocialLogin}
+                        onClick={() => handleDefaultLogin()}
                         className="w-full bg-white hover:bg-gray-50 text-[#1A1A1A] font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95 border-2 border-gray-200 hover:border-gray-300"
                     >
+                        <GoogleIcon />
                         Continue with Google
                     </button>
 
                     <button 
-                        onClick={handleSocialLogin}
+                        onClick={() => handleDefaultLogin()}
                         className="w-full bg-black text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95 border-2 border-black hover:bg-gray-900"
                     >
+                        <AppleIcon />
                         Continue with Apple
                     </button>
 
@@ -221,24 +220,24 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
                             <div className="w-full border-t border-gray-100"></div>
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-white px-2 text-gray-400 font-bold tracking-widest">Or Enter Studio</span>
+                            <span className="bg-white px-2 text-gray-400 font-bold tracking-widest">Or Enter Alias</span>
                         </div>
                     </div>
 
-                    <form onSubmit={handleDirectEntry} className="space-y-3">
+                    <form onSubmit={handleDefaultLogin} className="space-y-3">
                          <input 
                             type="text" 
                             value={nameInput}
                             onChange={(e) => setNameInput(e.target.value)}
-                            placeholder="Your Name (e.g. Tanishk)" 
-                            className="w-full bg-[#F5F1E6] rounded-xl px-4 py-4 font-bold text-[#1A1A1A] text-center outline-none focus:ring-2 focus:ring-[#F0543C] transition-all placeholder:text-gray-400"
+                            placeholder="Creator Alias (Default: John Doe)" 
+                            className="w-full bg-[#F5F1E6] rounded-xl px-4 py-4 font-bold text-[#1A1A1A] text-center outline-none focus:ring-2 focus:ring-[#E86D44] transition-all placeholder:text-gray-400"
                         />
                         <button 
                             type="submit" 
                             disabled={isLoading}
                             className="w-full bg-[#E86D44] text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-[4px_4px_0px_#1A1A1A] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#1A1A1A] active:translate-y-[0px] active:shadow-none transition-all flex items-center justify-center gap-2"
                         >
-                            {isLoading ? <Loader2 className="animate-spin" /> : <>ENTER THE STUDIO <ArrowRight size={18} /></>}
+                            {isLoading ? <Loader2 className="animate-spin" /> : <>ACCESS STUDIO <ArrowRight size={18} /></>}
                         </button>
                     </form>
                 </div>
@@ -246,7 +245,7 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
         </div>
         
         <p className="absolute bottom-8 text-xs text-[#1A1A1A]/30 font-bold max-w-xs text-center">
-            By entering, you accept our <a href="#" className="underline hover:text-[#F0543C]">Terms of Integrity</a>.
+            By entering, you accept our <a href="#" className="underline hover:text-[#E86D44]">Terms of Integrity</a>.
         </p>
     </div>
   );
@@ -271,8 +270,8 @@ const OnboardingTour = ({ user, onClose }: { user: UserProfile; onClose: () => v
     {
       title: `Welcome, ${user.name.split(' ')[0] || 'Creator'}.`,
       desc: "Let's secure your voice. VOUCH is the first integrity engine designed to catch liabilities before the algorithm does.",
-      icon: <ShieldCheck size={48} className="text-[#F0543C]" />,
-      color: "border-[#F0543C]"
+      icon: <ShieldCheck size={48} className="text-[#E86D44]" />,
+      color: "border-[#E86D44]"
     },
     {
       title: "The Spectrum",
@@ -336,14 +335,23 @@ const OnboardingTour = ({ user, onClose }: { user: UserProfile; onClose: () => v
 // --- MAIN APP ---
 
 function App() {
+  // --- GLOBAL STATE STORE ---
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [activePage, setActivePageState] = useState<'home' | 'spectrum' | 'studio' | 'contact' | 'profile'>('home');
+  
+  // Modal Global State
+  const [modalConfig, setModalConfig] = useState<ModalConfig>({
+      isOpen: false,
+      title: '',
+      content: null,
+      type: 'info'
+  });
 
   const [user, setUser] = useState<UserProfile>({
     name: '',
-    role: 'HCD / UI UX Design',
+    role: 'Creator',
   });
 
   const [studioState, setStudioState] = useState<StudioState>({
@@ -373,6 +381,15 @@ function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   };
 
+  // GLOBAL MODAL ACTIONS
+  const openModal = (config: Omit<ModalConfig, 'isOpen'>) => {
+      setModalConfig({ ...config, isOpen: true });
+  };
+
+  const closeModal = () => {
+      setModalConfig(prev => ({ ...prev, isOpen: false }));
+  };
+
   const renderPage = () => {
     switch (activePage) {
         case 'home': return <Home setPage={setActivePage} />;
@@ -385,7 +402,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F1E6] flex flex-col font-[Plus Jakarta Sans] overflow-x-hidden selection:bg-[#F0543C] selection:text-white cursor-none">
+    <div className="min-h-screen bg-[#F5F1E6] flex flex-col font-[Plus Jakarta Sans] overflow-x-hidden selection:bg-[#E86D44] selection:text-white cursor-none">
       <FocusCursor />
       
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
@@ -398,12 +415,21 @@ function App() {
         <>
             {showOnboarding && <OnboardingTour user={user} onClose={() => setShowOnboarding(false)} />}
             
-            <div className={`animate-in fade-in duration-700 ${showOnboarding ? 'blur-md pointer-events-none' : ''}`}>
+            <Modal 
+                isOpen={modalConfig.isOpen} 
+                onClose={closeModal} 
+                title={modalConfig.title} 
+                type={modalConfig.type}
+            >
+                {modalConfig.content}
+            </Modal>
+
+            <div className={`animate-in fade-in duration-700 ${showOnboarding || modalConfig.isOpen ? 'blur-sm' : ''}`}>
                 <Navbar activePage={activePage} setPage={setActivePage} user={user} isAuthenticated={isAuthenticated} />
                 <main className="flex-grow">
                     {renderPage()}
                 </main>
-                <Footer setPage={setActivePage} activePage={activePage} />
+                <Footer setPage={setActivePage} activePage={activePage} openModal={openModal} />
             </div>
         </>
       )}

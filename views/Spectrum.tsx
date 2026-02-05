@@ -76,18 +76,18 @@ const DeepDiveCard: React.FC<{
 export const Spectrum: React.FC = () => {
     return (
         <div className="w-full pt-32 pb-0 bg-[#F5F1E6]">
-             {/* Hero Section: Sunset Terracotta */}
+             {/* Hero Section: Sunset Terracotta - REMOVED SHADOWS */}
              <div className="w-full bg-[#E86D44] min-h-[60vh] flex flex-col items-center justify-center text-center p-8 relative overflow-hidden border-b-4 border-[#1A1A1A] rounded-b-[4rem]">
                 <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" 
                      style={{ backgroundImage: 'radial-gradient(#1A1A1A 2px, transparent 2px)', backgroundSize: '30px 30px' }}>
                 </div>
                 
                 <div className="max-w-5xl mx-auto z-10 space-y-8">
-                     <div className="inline-block bg-[#1A1A1A] text-white px-6 py-2 rounded-full font-black uppercase tracking-widest text-sm shadow-[4px_4px_0px_white] animate-in slide-in-from-top-4">
+                     <div className="inline-block bg-[#1A1A1A] text-white px-6 py-2 rounded-full font-black uppercase tracking-widest text-sm animate-in slide-in-from-top-4">
                         The Methodology
                      </div>
                      <h1 className="text-7xl md:text-[9rem] font-black text-[#1A1A1A] leading-[0.9] tracking-tighter">
-                        THE <br/> <span className="text-white drop-shadow-md">SPECTRUM.</span>
+                        THE <br/> <span className="text-white">SPECTRUM.</span>
                      </h1>
                      <p className="text-2xl font-bold text-[#1A1A1A]/80 max-w-2xl mx-auto leading-tight">
                         We categorize content into four levels of "Impact" so you can keep the receipts and lose the risk.

@@ -25,7 +25,7 @@ export const Contact: React.FC = () => {
             <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
                 
                 {/* Left Column: Typography */}
-                <div className="lg:sticky lg:top-32 space-y-12">
+                <div className="lg:sticky lg:top-32 space-y-8">
                     <div className="inline-flex items-center gap-2 bg-[#1A1A1A] text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest animate-in slide-in-from-left-4 fade-in">
                         <span className="w-2 h-2 bg-[#F0543C] rounded-full animate-pulse"></span>
                         Direct Line
@@ -40,10 +40,6 @@ export const Contact: React.FC = () => {
                     <p className="text-2xl font-bold text-gray-400 max-w-md leading-tight">
                         Got a question about the Impact Hierarchy? Or just want to rant about demonetization? We're listening.
                     </p>
-
-                    <div className="hidden lg:block">
-                        <ArrowDown className="text-[#1A1A1A] w-12 h-12 animate-bounce opacity-50" />
-                    </div>
                 </div>
 
                 {/* Right Column: Functional Form */}
@@ -120,7 +116,7 @@ export const Contact: React.FC = () => {
                             <Button 
                                 variant="primary" 
                                 size="lg" 
-                                className="w-full text-xl py-6 mt-4 shadow-[8px_8px_0px_#1A1A1A] hover:shadow-[10px_10px_0px_#1A1A1A] active:scale-95 transition-all duration-150"
+                                className="w-full text-xl py-6 mt-4 shadow-[8px_8px_0px_#E86D44] hover:shadow-[10px_10px_0px_#E86D44] active:scale-[0.98] active:shadow-none transition-all duration-200"
                                 icon={<Send size={24} />}
                             >
                                 SEND TRANSMISSION

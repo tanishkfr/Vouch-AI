@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type Platform = 'YouTube' | 'Spotify' | 'General';
 
 export type Severity = 'blue' | 'yellow' | 'orange' | 'red';
@@ -35,4 +37,11 @@ export interface StudioState {
 export interface UserProfile {
     name: string;
     role: string;
+}
+
+export interface ModalConfig {
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode;
+    type?: 'info' | 'legal' | 'coming-soon';
 }
