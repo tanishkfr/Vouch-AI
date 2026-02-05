@@ -50,7 +50,7 @@ export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: strin
                 <Button 
                    variant="secondary" 
                    size="lg" 
-                   onClick={() => alert("Simulating Export...")}
+                   onClick={() => alert("Simulating Publish Workflow...")}
                    className="scale-125 border-4 border-[#1A1A1A] shadow-[0_0_30px_rgba(123,198,92,0.3)] hover:shadow-[0_0_50px_rgba(123,198,92,0.6)]"
                 >
                     Export & Publish
@@ -108,7 +108,7 @@ export const Footer: React.FC<{ setPage: (page: any) => void; activePage?: strin
             <a href="#" onClick={(e) => handleLinkClick(e, "Security")} className="hover:text-white transition-colors">Security</a>
           </div>
           
-          <div className="text-xs font-black uppercase tracking-widest text-gray-600 md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
+          <div className="text-xs font-black uppercase tracking-widest text-gray-600 md:absolute md:left-1/2 md:transform md:-translate-x-1/2 w-full text-center">
             © 2026 AUDIT-POP INC.
           </div>
 
