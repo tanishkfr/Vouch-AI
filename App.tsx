@@ -6,9 +6,21 @@ import { Spectrum } from './views/Spectrum';
 import { Studio } from './views/Studio';
 import { Contact } from './views/Contact';
 import { Profile } from './views/Profile';
+import { StudioState } from './types';
 
 function App() {
   const [activePage, setActivePageState] = useState<'home' | 'spectrum' | 'studio' | 'contact' | 'profile'>('home');
+
+  // Persistent Studio State
+  const [studioState, setStudioState] = useState<StudioState>({
+    file: null,
+    status: 'idle',
+    progress: 0,
+    flags: [],
+    waveformBars: [],
+    platform: 'YouTube',
+    showDownload: false
+  });
 
   const setActivePage = (page: 'home' | 'spectrum' | 'studio' | 'contact' | 'profile') => {
     setActivePageState(page);
@@ -19,9 +31,9 @@ function App() {
     switch (activePage) {
         case 'home': return <Home setPage={setActivePage} />;
         case 'spectrum': return <Spectrum />;
-        case 'studio': return <Studio />;
+        case 'studio': return <Studio studioState={studioState} setStudioState={setStudioState} />;
         case 'contact': return <Contact />;
-        case 'profile': return <Profile />;
+        case 'profile': return <Profile setPage={setActivePage} />;
         default: return <Home setPage={setActivePage} />;
     }
   };
@@ -32,7 +44,7 @@ function App() {
       
       {renderPage()}
 
-      <Footer setPage={setActivePage} />
+      <Footer setPage={setActivePage} activePage={activePage} />
     </div>
   );
 }

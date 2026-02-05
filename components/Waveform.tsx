@@ -38,8 +38,11 @@ export const Waveform: React.FC<WaveformProps> = ({ isScanning, scanComplete, fl
     const totalBars = bars.length;
     const percentage = (index / totalBars) * 100;
     
-    // Find flag within +/- 2% of this bar's position
+    // Find flag within +/- 1.5% of this bar's position
     return flags.find(f => {
+        // IGNORE RESOLVED FLAGS
+        if (f.status === 'resolved') return false;
+
         const flagPerc = (f.seconds / 1800) * 100; // Assuming 30min (1800s) duration
         return percentage >= flagPerc - 1.5 && percentage <= flagPerc + 1.5;
     });

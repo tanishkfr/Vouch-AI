@@ -2,7 +2,7 @@ import React from 'react';
 import { Youtube, Music, CheckCircle, ShieldCheck, Activity, Award, GraduationCap } from 'lucide-react';
 import { Waveform } from '../components/Waveform';
 
-export const Profile: React.FC = () => {
+export const Profile: React.FC<{ setPage: (page: any) => void }> = ({ setPage }) => {
     // Mock data for the mini-waveform
     const waveformBars = Array.from({ length: 40 }, () => Math.floor(Math.random() * 60) + 20);
     const mockFlags = [
@@ -130,7 +130,7 @@ export const Profile: React.FC = () => {
                         
                         <div className="mt-6 flex justify-between items-center text-sm font-bold text-gray-400">
                              <span>Processed 2h ago</span>
-                             <span className="text-[#F0543C] cursor-pointer hover:underline">View Report</span>
+                             <span className="text-[#F0543C] cursor-pointer hover:underline" onClick={() => setPage('studio')}>View Report</span>
                         </div>
                     </div>
 

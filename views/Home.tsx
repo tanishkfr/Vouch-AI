@@ -2,6 +2,20 @@ import React from 'react';
 import { ShieldCheck, Zap, Users, Lock, Database, FileSearch, ArrowDown } from 'lucide-react';
 import { Button } from '../components/Button';
 
+// Custom Stylized Lock Icon (Minimalist)
+const StylizedLock = () => (
+  <svg viewBox="0 0 100 100" className="w-full h-full text-white/90">
+    <path d="M30 40 V 25 C 30 10, 70 10, 70 25 V 40" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+    <rect x="20" y="40" width="60" height="50" rx="12" stroke="currentColor" strokeWidth="6" fill="none" />
+    <circle cx="50" cy="60" r="4" fill="currentColor" />
+    <path d="M50 64 V 72" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+    
+    {/* Minimalist Accents */}
+    <circle cx="75" cy="20" r="3" fill="#F0543C" />
+    <path d="M20 80 L 10 90" stroke="#7BC65C" strokeWidth="4" strokeLinecap="round" />
+  </svg>
+);
+
 export const Home: React.FC<{ setPage: (page: any) => void }> = ({ setPage }) => {
   return (
     <div className="w-full pt-0">
@@ -109,9 +123,8 @@ export const Home: React.FC<{ setPage: (page: any) => void }> = ({ setPage }) =>
                 </div>
             </div>
             <div className="flex-1 flex justify-center">
-                <div className="w-full aspect-square max-w-md bg-[#2D2D2D] rounded-[3rem] flex items-center justify-center relative border-4 border-white/5">
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                    <Lock size={120} className="text-white/20" />
+                <div className="w-80 h-80 flex items-center justify-center p-8">
+                     <StylizedLock />
                 </div>
             </div>
          </div>

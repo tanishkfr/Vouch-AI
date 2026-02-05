@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flag } from '../types';
 import { Button } from './Button';
-import { AlertCircle, Wand2, Trash2, X } from 'lucide-react';
+import { AlertCircle, Wand2, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 
 interface FlagCardProps {
   flag: Flag;
@@ -12,6 +12,8 @@ interface FlagCardProps {
 
 export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
   const isRed = flag.severity === 'red';
+  const isResolved = flag.status === 'resolved';
+  const isProcessing = flag.status === 'processing';
 
   const severityStyles = {
     blue: 'bg-blue-50 text-blue-600',
@@ -19,6 +21,17 @@ export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
     orange: 'bg-orange-50 text-orange-600',
     red: 'bg-red-50 text-red-600',
   };
+
+  if (isResolved) {
+      return (
+        <div className="bg-white/50 border-2 border-[#7BC65C]/20 rounded-[2rem] p-6 transition-all duration-300 opacity-70 hover:opacity-100">
+            <div className="flex items-center gap-3 text-[#7BC65C]">
+                <CheckCircle2 size={24} />
+                <span className="font-bold text-lg">Issue Resolved</span>
+            </div>
+        </div>
+      );
+  }
 
   return (
     <div className={`group relative bg-white rounded-[2rem] p-6 transition-all duration-300 hover:shadow-xl border border-transparent hover:border-black/5 animate-in slide-in-from-right-4`}>
@@ -57,8 +70,13 @@ export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
                 variant="neutral" 
                 className="flex-1 rounded-xl text-sm"
                 onClick={() => onFix(flag.id)}
+                disabled={isProcessing}
             >
-                Auto-Fix
+                {isProcessing ? (
+                    <span className="flex items-center gap-2">
+                        <Loader2 className="animate-spin" size={16} /> Scrubbing...
+                    </span>
+                ) : "Auto-Fix"}
             </Button>
             {(flag.severity === 'red' || flag.severity === 'orange') && (
                 <Button 
@@ -67,6 +85,7 @@ export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
                     className="rounded-xl px-4"
                     onClick={() => onNuke(flag.id)}
                     title="Nuke Segment"
+                    disabled={isProcessing}
                 >
                     <Trash2 size={20} />
                 </Button>

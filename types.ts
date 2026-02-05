@@ -11,9 +11,20 @@ export interface Flag {
   transcript: string;
   aiReason: string;
   suggestedFix: string;
+  status?: 'active' | 'processing' | 'resolved'; // Added for state management
 }
 
 export interface WaveformBar {
   height: number;
   active: boolean;
+}
+
+export interface StudioState {
+    file: File | null;
+    status: 'idle' | 'analyzing' | 'complete';
+    progress: number;
+    flags: Flag[];
+    waveformBars: number[];
+    platform: Platform;
+    showDownload: boolean;
 }

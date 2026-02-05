@@ -1,33 +1,35 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Platform, Flag } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Platform, Flag, StudioState } from '../types';
 import { Button } from '../components/Button';
 import { Waveform } from '../components/Waveform';
 import { FlagCard } from '../components/FlagCard';
-import { Upload, Sparkles, CheckCircle, RotateCcw, Download, Mic, AlertTriangle, Trash2, Settings, Terminal, RefreshCw } from 'lucide-react';
+import { Upload, Sparkles, CheckCircle, Download, RefreshCw, Trash2, Settings, Loader2 } from 'lucide-react';
 
-export const Studio: React.FC = () => {
-  const [platform, setPlatform] = useState<Platform>('YouTube');
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<'idle' | 'analyzing' | 'complete'>('idle');
-  const [progress, setProgress] = useState(0);
-  const [flags, setFlags] = useState<Flag[]>([]);
-  // Random waveform bars generated once per scan
-  const [waveformBars, setWaveformBars] = useState<number[]>([]);
-  
-  // Nuke Workflow State
+interface StudioProps {
+    studioState: StudioState;
+    setStudioState: React.Dispatch<React.SetStateAction<StudioState>>;
+}
+
+export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) => {
+  // Local state for UI interactions (Nuking confirmation doesn't need to persist if you navigate away)
   const [nukingState, setNukingState] = useState<'confirm' | 'processing' | 'done' | null>(null);
   const [flagToNuke, setFlagToNuke] = useState<string | null>(null);
   const [nukeProgress, setNukeProgress] = useState(0);
-  const [showDownload, setShowDownload] = useState(false);
 
-  // Theme Colors based on platform
+  // Destructure for ease
+  const { file, status, progress, flags, waveformBars, platform, showDownload } = studioState;
+
+  // Theme Colors
   const themeColors: Record<Platform, string> = {
-    YouTube: '#FF0000', // YouTube Red
-    Spotify: '#1DB954', // Spotify Green
-    General: '#1A1A1A'  // Charcoal
+    YouTube: '#FF0000',
+    Spotify: '#1DB954',
+    General: '#1A1A1A'
   };
 
-  // Randomized Flag Generator
+  const updateState = (updates: Partial<StudioState>) => {
+      setStudioState(prev => ({ ...prev, ...updates }));
+  };
+
   const generateRandomFlags = () => {
     const types = [
         { severity: 'red', type: 'The Nuke Zone', reason: 'Hate speech detected.' },
@@ -36,12 +38,12 @@ export const Studio: React.FC = () => {
         { severity: 'blue', type: 'Citation Needed', reason: 'Unverified stat.' }
     ];
 
-    const numFlags = Math.floor(Math.random() * 4) + 2; // 2 to 5 flags
+    const numFlags = Math.floor(Math.random() * 4) + 2; 
     const newFlags: Flag[] = [];
 
     for (let i = 0; i < numFlags; i++) {
         const randomType = types[Math.floor(Math.random() * types.length)];
-        const randomSec = Math.floor(Math.random() * 1600) + 100; // Random time
+        const randomSec = Math.floor(Math.random() * 1600) + 100;
         const mins = Math.floor(randomSec / 60);
         const secs = randomSec % 60;
         
@@ -53,42 +55,63 @@ export const Studio: React.FC = () => {
             type: randomType.type,
             transcript: "Generated content segment for simulation...",
             aiReason: randomType.reason,
-            suggestedFix: randomType.severity === 'red' ? 'Nuke Segment' : 'Review'
+            suggestedFix: randomType.severity === 'red' ? 'Nuke Segment' : 'Review',
+            status: 'active'
         });
     }
     return newFlags.sort((a, b) => a.seconds - b.seconds);
   };
 
   const startSimulation = () => {
-    if (!file) {
-        setFile(new File(["foo"], "audio_file.mp3", { type: "audio/mpeg" }));
+    let mockFile = file;
+    if (!mockFile) {
+        mockFile = new File(["foo"], "audio_file.mp3", { type: "audio/mpeg" });
     }
-    // Generate new random bars
-    setWaveformBars(Array.from({ length: 80 }, () => Math.floor(Math.random() * 60) + 20));
-    setStatus('analyzing');
-    setProgress(0);
-    setFlags([]); 
-    setShowDownload(false);
+    
+    updateState({
+        file: mockFile,
+        waveformBars: Array.from({ length: 80 }, () => Math.floor(Math.random() * 60) + 20),
+        status: 'analyzing',
+        progress: 0,
+        flags: [],
+        showDownload: false
+    });
   };
 
+  const handleAutoFix = (id: string) => {
+      // Optimistic update to processing
+      const processingFlags = flags.map(f => f.id === id ? { ...f, status: 'processing' } as Flag : f);
+      updateState({ flags: processingFlags });
+
+      // Simulate 2s delay
+      setTimeout(() => {
+        const resolvedFlags = studioState.flags.map(f => f.id === id ? { ...f, status: 'resolved' } as Flag : f);
+        setStudioState(prev => ({ ...prev, flags: resolvedFlags, showDownload: true }));
+      }, 2000);
+  };
+
+  // Scanning Effect
   useEffect(() => {
     if (status === 'analyzing') {
       const interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
+        setStudioState(prev => {
+          if (prev.progress >= 100) {
             clearInterval(interval);
-            setStatus('complete');
-            setFlags(generateRandomFlags());
-            return 100;
+            return { 
+                ...prev, 
+                status: 'complete', 
+                progress: 100,
+                flags: generateRandomFlags()
+            };
           }
-          return prev + 2; 
+          return { ...prev, progress: prev.progress + 2 }; 
         });
       }, 30);
       return () => clearInterval(interval);
     }
-  }, [status]);
+  }, [status, setStudioState]);
 
-  // Nuke Logic
+  // Nuke Effect
   useEffect(() => {
     if (nukingState === 'processing') {
       setNukeProgress(0);
@@ -97,9 +120,14 @@ export const Studio: React.FC = () => {
           if (prev >= 100) {
             clearInterval(interval);
             setNukingState('done');
-            setShowDownload(true);
+            
+            // Actually remove the flag
             if (flagToNuke) {
-                setFlags(prevFlags => prevFlags.filter(f => f.id !== flagToNuke));
+                setStudioState(current => ({
+                    ...current,
+                    flags: current.flags.filter(f => f.id !== flagToNuke),
+                    showDownload: true
+                }));
             }
             return 100;
           }
@@ -108,15 +136,19 @@ export const Studio: React.FC = () => {
       }, 20);
       return () => clearInterval(interval);
     }
-  }, [nukingState, flagToNuke]);
+  }, [nukingState, flagToNuke, setStudioState]);
 
   const reset = () => {
-    setFile(null);
-    setStatus('idle');
-    setFlags([]);
+    setStudioState({
+        file: null,
+        status: 'idle',
+        progress: 0,
+        flags: [],
+        waveformBars: [],
+        platform: platform, // keep platform preference
+        showDownload: false
+    });
     setNukingState(null);
-    setProgress(0);
-    setShowDownload(false);
   };
 
   return (
@@ -126,7 +158,6 @@ export const Studio: React.FC = () => {
         {/* Left Panel: Upload & Engine */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Dynamic Header */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white px-8 py-6 rounded-[2.5rem] shadow-sm transition-all duration-500 border-l-[12px]" style={{ borderLeftColor: themeColors[platform] }}>
             <h2 className="text-6xl font-black tracking-tighter flex items-center gap-3 transition-colors duration-500 uppercase" style={{ color: themeColors[platform] }}>
                 Studio
@@ -136,7 +167,7 @@ export const Studio: React.FC = () => {
                {(['YouTube', 'Spotify', 'General'] as Platform[]).map(p => (
                  <button
                    key={p}
-                   onClick={() => setPlatform(p)}
+                   onClick={() => updateState({ platform: p })}
                    className={`px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 ${
                      platform === p ? 'shadow-xl text-white scale-105' : 'text-gray-400 hover:text-[#1A1A1A]'
                    }`}
@@ -149,19 +180,17 @@ export const Studio: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Engine Area */}
           <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl min-h-[600px] flex flex-col relative overflow-hidden transition-all duration-500 border-4 border-white">
             
             <div className="flex-1 flex flex-col justify-center">
               
-              {/* STATE 1: IDLE */}
               {status === 'idle' && (
                 <div 
                   className="flex-1 border-4 border-dashed border-[#E5E0D6] rounded-[2rem] flex flex-col items-center justify-center text-center p-12 hover:border-[#1A1A1A] hover:bg-gray-50 transition-all cursor-pointer group gap-6"
                   onClick={() => !file && document.getElementById('file-upload')?.click()}
                 >
                   <input id="file-upload" type="file" className="hidden" onChange={(e) => {
-                    if (e.target.files) setFile(e.target.files[0]);
+                    if (e.target.files) updateState({ file: e.target.files[0] });
                   }} />
                   
                   {!file ? (
@@ -197,7 +226,6 @@ export const Studio: React.FC = () => {
                 </div>
               )}
 
-              {/* STATE 2: ANALYZING */}
               {status === 'analyzing' && (
                  <div className="w-full max-w-2xl mx-auto text-center space-y-8">
                     <h3 className="text-4xl font-black text-[#1A1A1A] animate-pulse">Running Neural Scan...</h3>
@@ -212,7 +240,6 @@ export const Studio: React.FC = () => {
                  </div>
               )}
 
-              {/* STATE 3: COMPLETE */}
               {status === 'complete' && (
                 <div className="space-y-8 animate-in fade-in duration-700">
                   <div className="flex justify-between items-end px-4">
@@ -236,7 +263,6 @@ export const Studio: React.FC = () => {
                     <span className="font-mono text-sm font-bold text-gray-400">30:00</span>
                   </div>
 
-                  {/* DOWNLOAD SECTION */}
                   {showDownload && (
                       <div className="bg-[#1A1A1A] rounded-[2rem] p-8 mt-8 border-2 border-transparent hover:border-white/20 animate-in slide-in-from-bottom-8 shadow-2xl flex flex-col md:flex-row gap-6 items-center justify-between text-white">
                              <div className="text-center md:text-left">
@@ -257,7 +283,7 @@ export const Studio: React.FC = () => {
         <div className="lg:col-span-4 flex flex-col h-full">
            <div className="bg-[#1A1A1A] text-white p-8 rounded-t-[2.5rem] flex items-center justify-between shadow-xl z-10 relative">
              <h3 className="text-2xl font-black tracking-tight">Risk Feed</h3>
-             <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold">{flags.length} Issues</span>
+             <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold">{flags.filter(f => f.status !== 'resolved').length} Issues</span>
            </div>
            
            <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-b-[2.5rem] p-6 space-y-4 min-h-[400px] border border-white shadow-lg -mt-4 pt-10 overflow-y-auto max-h-[800px]">
@@ -274,11 +300,11 @@ export const Studio: React.FC = () => {
                  flag={flag} 
                  autoNukeEnabled={false}
                  onNuke={() => { setFlagToNuke(flag.id); setNukingState('confirm'); }}
-                 onFix={() => {}}
+                 onFix={() => handleAutoFix(flag.id)}
                />
              ))}
              
-             {status === 'complete' && flags.length === 0 && (
+             {status === 'complete' && flags.every(f => f.status === 'resolved') && (
                 <div className="h-full flex flex-col items-center justify-center text-[#7BC65C] space-y-4 animate-in zoom-in">
                     <CheckCircle size={64} />
                     <h4 className="text-2xl font-black">All Clear!</h4>
