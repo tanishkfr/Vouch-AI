@@ -108,7 +108,7 @@ const FocusCursor = () => {
     // DIRECT DOM MANIPULATION FOR ZERO LAG
     const onMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e;
-      // Use translate3d for GPU acceleration
+      // Use translate3d for GPU acceleration, NO TRANSITION on position
       const transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%)`;
       if (dotRef.current) dotRef.current.style.transform = transform;
       if (ringRef.current) ringRef.current.style.transform = transform;
@@ -146,7 +146,8 @@ const FocusCursor = () => {
         ref={ringRef}
         className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full border-[2px] flex items-center justify-center will-change-transform"
         style={{
-            transition: 'width 0.2s ease-out, height 0.2s ease-out, border-color 0.2s, opacity 0.2s', 
+            // CRITICAL: Only transition aesthetic properties, NOT transform
+            transition: 'width 0.2s cubic-bezier(0.25, 1, 0.5, 1), height 0.2s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s, opacity 0.2s', 
             width: hoverState !== 'default' ? '32px' : '20px',
             height: hoverState !== 'default' ? '32px' : '20px',
             borderColor: hoverState === 'danger' ? '#F0543C' : '#E86D44',
@@ -159,6 +160,7 @@ const FocusCursor = () => {
         style={{
             width: '4px',
             height: '4px',
+            transition: 'box-shadow 0.2s',
             boxShadow: hoverState !== 'default' ? '0 0 15px 2px rgba(255,255,255,0.8)' : 'none'
         }}
       />

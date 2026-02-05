@@ -22,20 +22,18 @@ export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
     red: 'bg-red-50 text-red-600',
   };
 
+  // Enhanced feedback for resolved state (Fade out logic)
   if (isResolved) {
       return (
-        <div className="bg-white/50 border-2 border-[#7BC65C]/20 rounded-[2rem] p-6 transition-all duration-300 opacity-70 hover:opacity-100">
-            <div className="flex items-center gap-3 text-[#7BC65C]">
-                <CheckCircle2 size={24} />
-                <span className="font-bold text-lg">Issue Resolved</span>
-            </div>
+        <div className="h-0 opacity-0 overflow-hidden transition-all duration-700 ease-in-out">
+            {/* Collapse element gracefully */}
         </div>
       );
   }
 
   return (
     <div 
-        className={`group relative bg-white rounded-[2rem] p-6 transition-all duration-300 hover:shadow-xl border border-transparent hover:border-black/5 animate-in slide-in-from-right-4`}
+        className={`group relative bg-white rounded-[2rem] p-6 transition-all duration-300 hover:shadow-xl border border-transparent hover:border-black/5 animate-in slide-in-from-right-4 ${isProcessing ? 'opacity-80 scale-[0.98]' : ''}`}
         data-cursor={isRed ? "danger" : undefined}
     >
       
@@ -76,8 +74,8 @@ export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
                 disabled={isProcessing}
             >
                 {isProcessing ? (
-                    <span className="flex items-center gap-2">
-                        <Loader2 className="animate-spin" size={16} /> Scrubbing...
+                    <span className="flex items-center gap-2 animate-pulse">
+                        <Loader2 className="animate-spin" size={16} /> Fixing...
                     </span>
                 ) : "Auto-Fix"}
             </Button>

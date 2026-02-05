@@ -3,7 +3,7 @@ import { Platform, Flag, StudioState, Severity } from '../types';
 import { Button } from '../components/Button';
 import { Waveform } from '../components/Waveform';
 import { FlagCard } from '../components/FlagCard';
-import { Upload, CheckCircle, RefreshCw, Trash2, Settings, Loader2, ListPlus, Video, Mic, Eye, Check, AlertTriangle, Shield, Power, ToggleLeft, ToggleRight, LayoutTemplate, Type, QrCode, Info, FileText, Highlighter, X, Download, FileAudio, SearchCheck, RotateCcw } from 'lucide-react';
+import { Upload, CheckCircle, RefreshCw, Trash2, Settings, Loader2, ListPlus, Video, Mic, Eye, Check, AlertTriangle, Shield, Power, ToggleLeft, ToggleRight, LayoutTemplate, Type, QrCode, Info, FileText, Highlighter, X, Download, FileAudio, SearchCheck, RotateCcw, AlertOctagon } from 'lucide-react';
 
 interface StudioProps {
     studioState: StudioState;
@@ -58,6 +58,19 @@ const RISK_DATA: Record<Severity, { transcript: string; reason: string }[]> = {
     ]
 };
 
+// Internal Toast Component
+const Toast = ({ message }: { message: string | null }) => {
+    if (!message) return null;
+    return (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-5 fade-in duration-300">
+            <div className="bg-[#1A1A1A] text-white px-8 py-4 rounded-full font-black uppercase tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.3)] border-2 border-white flex items-center gap-3">
+                <CheckCircle size={20} className="text-[#7BC65C]" />
+                {message}
+            </div>
+        </div>
+    );
+};
+
 export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [dragActive, setDragActive] = useState(false);
@@ -65,6 +78,11 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
     // Local state for export progress tracking
     const [processingExportId, setProcessingExportId] = useState<string | null>(null);
     const [readyExportId, setReadyExportId] = useState<string | null>(null);
+
+    // Nuke All & Toast State
+    const [isNuking, setIsNuking] = useState(false);
+    const [nukeProgress, setNukeProgress] = useState(0);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     // Mock Scanning Logic
     const startScan = (file: File) => {
@@ -78,6 +96,8 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
         }));
         setReadyExportId(null);
         setProcessingExportId(null);
+        setIsNuking(false);
+        setNukeProgress(0);
         
         // Simulate progress
         let progress = 0;
@@ -159,10 +179,54 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
     };
 
     const handleFix = (id: string) => {
+        // Set processing state first
         setStudioState(prev => ({
             ...prev,
-            flags: prev.flags.map(f => f.id === id ? { ...f, status: 'resolved' as const } : f)
+            flags: prev.flags.map(f => f.id === id ? { ...f, status: 'processing' } : f)
         }));
+
+        // Delay for simulation
+        setTimeout(() => {
+            setStudioState(prev => ({
+                ...prev,
+                flags: prev.flags.map(f => f.id === id ? { ...f, status: 'resolved' as const } : f)
+            }));
+            showToast("Integrity Restored. 🌶️");
+        }, 1000);
+    };
+
+    const handleNukeAll = () => {
+        setIsNuking(true);
+        setNukeProgress(0);
+
+        // Animate scrub progress over 1.5s
+        const duration = 1500;
+        const start = performance.now();
+
+        const frame = (now: number) => {
+            const elapsed = now - start;
+            const p = Math.min(elapsed / duration, 1);
+            setNukeProgress(p * 100);
+
+            if (p < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                // Done
+                setIsNuking(false);
+                setStudioState(prev => ({
+                    ...prev,
+                    // Remove Red and Orange flags completely
+                    flags: prev.flags.filter(f => f.severity !== 'red' && f.severity !== 'orange')
+                }));
+                showToast("Integrity Restored. 🌶️");
+            }
+        };
+        requestAnimationFrame(frame);
+    };
+
+    const showToast = (msg: string) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 3000);
     };
 
     const triggerExport = (id: string) => {
@@ -199,8 +263,12 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
         General: '#1A1A1A' 
     };
 
+    const highRiskCount = studioState.flags.filter(f => (f.severity === 'red' || f.severity === 'orange') && f.status !== 'resolved').length;
+
     return (
         <div className="w-full pt-32 pb-20 px-6 min-h-screen">
+             <Toast message={toastMessage} />
+             
              <div className="max-w-7xl mx-auto">
                 
                 {/* Header */}
@@ -281,6 +349,8 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                                     flags={studioState.flags} 
                                     themeColor={themeColors[studioState.platform]} 
                                     bars={studioState.waveformBars} 
+                                    isNuking={isNuking}
+                                    nukeProgress={nukeProgress}
                                 />
                                 
                                 <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-black/5 flex items-center justify-between">
@@ -370,12 +440,37 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                         <div className="bg-[#1A1A1A] rounded-[2.5rem] p-6 min-h-[600px] flex flex-col relative overflow-hidden">
                              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
-                             <div className="flex items-center justify-between mb-8 relative z-10">
-                                <h3 className="text-2xl font-black text-white">Analysis Log</h3>
-                                <div className="bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-white flex items-center gap-2">
-                                    <AlertTriangle size={14} className="text-[#F0543C]" />
-                                    {studioState.flags.filter(f => f.status !== 'resolved').length} Issues
-                                </div>
+                             {/* Analysis Header with Nuke Button */}
+                             <div className="flex flex-col gap-4 mb-8 relative z-10">
+                                 <div className="flex items-center justify-between">
+                                    <h3 className="text-2xl font-black text-white">Analysis Log</h3>
+                                    <div className="bg-white/10 px-3 py-1 rounded-full text-xs font-bold text-white flex items-center gap-2">
+                                        <AlertTriangle size={14} className="text-[#F0543C]" />
+                                        {studioState.flags.filter(f => f.status !== 'resolved').length} Issues
+                                    </div>
+                                 </div>
+                                 
+                                 {/* NUKE ALL BUTTON */}
+                                 {studioState.status === 'complete' && highRiskCount > 0 && (
+                                     <button 
+                                        onClick={handleNukeAll}
+                                        disabled={isNuking}
+                                        data-cursor="danger"
+                                        className="w-full bg-[#F0543C] hover:bg-[#d63f28] text-white py-3 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                     >
+                                         {isNuking ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                Scrubbing...
+                                            </>
+                                         ) : (
+                                            <>
+                                                <AlertOctagon size={16} />
+                                                NUKE ALL RISKS
+                                            </>
+                                         )}
+                                     </button>
+                                 )}
                              </div>
 
                              <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar relative z-10">
@@ -399,13 +494,13 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                                     <FlagCard 
                                         key={flag.id} 
                                         flag={flag} 
-                                        autoNukeEnabled={true} 
+                                        autoNukeEnabled={!isNuking} 
                                         onNuke={handleNuke} 
                                         onFix={handleFix} 
                                     />
                                 ))}
                                 {studioState.status === 'complete' && studioState.flags.length === 0 && (
-                                    <div className="text-center text-white/50 mt-20">
+                                    <div className="text-center text-white/50 mt-20 animate-in fade-in zoom-in">
                                         <CheckCircle size={48} className="mx-auto mb-4 text-[#7BC65C]" />
                                         <p className="font-bold text-white">No risks detected.</p>
                                         <p className="text-sm mt-2">You are safe to publish.</p>

@@ -8,9 +8,20 @@ interface WaveformProps {
   themeColor: string; 
   bars: number[]; 
   onFlagClick?: (flag: Flag) => void;
+  isNuking?: boolean;
+  nukeProgress?: number;
 }
 
-export const Waveform: React.FC<WaveformProps> = ({ isScanning, scanComplete, flags, themeColor, bars, onFlagClick }) => {
+export const Waveform: React.FC<WaveformProps> = ({ 
+    isScanning, 
+    scanComplete, 
+    flags, 
+    themeColor, 
+    bars, 
+    onFlagClick,
+    isNuking = false,
+    nukeProgress = 0
+}) => {
   const [scanProgress, setScanProgress] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -70,20 +81,21 @@ export const Waveform: React.FC<WaveformProps> = ({ isScanning, scanComplete, fl
       <div className="w-full h-full flex items-center justify-between gap-1 z-10" onMouseLeave={() => setHoveredIndex(null)}>
         {bars.map((height, i) => {
            const flag = getFlagForBar(i);
-           const isInteractive = flag && (flag.severity === 'blue' || flag.severity === 'yellow');
+           // If nuking, red flags disappear as the bar passes
+           const isFlagNuked = isNuking && flag && (flag.severity === 'red' || flag.severity === 'orange') && nukeProgress > (i / bars.length) * 100;
            
            return (
             <div 
               key={i}
               onClick={() => flag && onFlagClick && onFlagClick(flag)}
-              className={`w-full rounded-full transition-all duration-300 relative ${flag ? 'animate-pulse cursor-pointer' : ''}`}
+              className={`w-full rounded-full transition-all duration-300 relative ${flag && !isFlagNuked ? 'animate-pulse cursor-pointer' : ''}`}
               onMouseEnter={() => setHoveredIndex(i)}
               style={{ 
                 height: `${scanComplete ? height : 10}%`,
                 backgroundColor: isScanning 
                   ? (scanProgress > (i / bars.length) * 100 ? themeColor : '#333')
-                  : getBarColor(i),
-                opacity: isScanning ? 1 : (flag ? 1 : 0.4), 
+                  : (isFlagNuked ? '#2D2D2D' : getBarColor(i)),
+                opacity: isScanning ? 1 : (flag && !isFlagNuked ? 1 : 0.4), 
                 transform: hoveredIndex === i ? 'scaleY(1.2)' : 'scaleY(1)'
               }}
             />
@@ -97,8 +109,20 @@ export const Waveform: React.FC<WaveformProps> = ({ isScanning, scanComplete, fl
              style={{ clipPath: `inset(0 0 0 ${scanProgress}%)`, transition: 'clip-path 0.05s linear' }} />
       )}
 
+      {/* NUKE WIPE OVERLAY */}
+      {isNuking && (
+          <div className="absolute inset-0 bg-[#F0543C]/20 rounded-[2rem] pointer-events-none z-20 flex items-center"
+               style={{ 
+                   clipPath: `inset(0 0 0 ${nukeProgress}%)`,
+                   transition: 'clip-path 0.05s linear'
+               }}
+          >
+              <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#F0543C] shadow-[0_0_20px_#F0543C]"></div>
+          </div>
+      )}
+
       {/* Tooltip */}
-      {hoveredFlag && (
+      {hoveredFlag && !isNuking && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white text-[#1A1A1A] px-6 py-3 rounded-xl shadow-2xl z-50 animate-in zoom-in-95 pointer-events-none border-2 border-black whitespace-nowrap">
             <div className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${
