@@ -35,6 +35,40 @@ const FingerprintBrandLogo = ({ className }: { className?: string }) => (
   </div>
 );
 
+// --- COMPONENT: SECURITY SHUTTER TRANSITION ---
+const SecurityShutter = ({ status }: { status: 'idle' | 'lockdown' | 'release' }) => {
+    // idle: Shutter is waiting at bottom (translate-y-full)
+    // lockdown: Shutter moves UP to cover screen (translate-y-0)
+    // release: Shutter moves UP to exit screen (-translate-y-full)
+    
+    // We disable transition when resetting from 'release' back to 'idle' to make it instant
+    const isAnimating = status !== 'idle';
+    
+    let transformClass = 'translate-y-[100%]'; // Default Idle
+    if (status === 'lockdown') transformClass = 'translate-y-0';
+    if (status === 'release') transformClass = '-translate-y-[100%]';
+
+    return (
+        <div 
+            className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center pointer-events-none will-change-transform ${transformClass}`}
+            style={{ 
+                transition: isAnimating ? 'transform 0.6s cubic-bezier(0.87, 0, 0.13, 1)' : 'none' 
+            }}
+        >
+            <div className="flex flex-col items-center gap-6 animate-pulse">
+                <div className="w-32 h-32 relative">
+                    <FingerprintBrandLogo className="w-full h-full" />
+                    {/* Scanning Ring */}
+                    <div className="absolute inset-[-10px] border-2 border-[#E86D44] rounded-full animate-spin-slow opacity-50 border-t-transparent border-l-transparent"></div>
+                </div>
+                <div className="font-mono text-[#E86D44] font-bold tracking-[0.3em] text-sm uppercase">
+                    Securing Sector...
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- COMPONENT: BIOMETRIC UNLOCK SPLASH ---
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [phase, setPhase] = useState<'idle' | 'scanning' | 'success' | 'exiting'>('idle');
@@ -374,6 +408,9 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [activePage, setActivePageState] = useState<'home' | 'spectrum' | 'studio' | 'contact' | 'profile'>('home');
   
+  // PAGE TRANSITION STATE
+  const [transitionStatus, setTransitionStatus] = useState<'idle' | 'lockdown' | 'release'>('idle');
+
   // Modal Global State
   const [modalConfig, setModalConfig] = useState<ModalConfig>({
       isOpen: false,
@@ -409,9 +446,27 @@ function App() {
       window.scrollTo({ top: 0, behavior: "instant" });
   };
 
-  const setActivePage = (page: 'home' | 'spectrum' | 'studio' | 'contact' | 'profile') => {
-    setActivePageState(page);
-    window.scrollTo({ top: 0, behavior: "instant" });
+  // --- TRANSITION LOGIC INTERCEPTOR ---
+  const handlePageChange = (newPage: 'home' | 'spectrum' | 'studio' | 'contact' | 'profile') => {
+      if (activePage === newPage || transitionStatus !== 'idle') return;
+
+      // 1. TRIGGER LOCKDOWN (Slide Up)
+      setTransitionStatus('lockdown');
+
+      // 2. WAIT FOR COVER (600ms) THEN SWAP CONTENT
+      setTimeout(() => {
+          setActivePageState(newPage);
+          window.scrollTo({ top: 0, behavior: "instant" });
+          
+          // 3. TRIGGER RELEASE (Slide Away Up)
+          setTransitionStatus('release');
+
+          // 4. RESET STATE AFTER ANIMATION (600ms + buffer)
+          setTimeout(() => {
+              setTransitionStatus('idle');
+          }, 600);
+
+      }, 600); 
   };
 
   // GLOBAL MODAL ACTIONS
@@ -425,12 +480,12 @@ function App() {
 
   const renderPage = () => {
     switch (activePage) {
-        case 'home': return <Home setPage={setActivePage} />;
+        case 'home': return <Home setPage={handlePageChange} />;
         case 'spectrum': return <Spectrum />;
         case 'studio': return <Studio studioState={studioState} setStudioState={setStudioState} />;
         case 'contact': return <Contact />;
-        case 'profile': return <Profile setPage={setActivePage} user={user} setUser={setUser} />;
-        default: return <Home setPage={setActivePage} />;
+        case 'profile': return <Profile setPage={handlePageChange} user={user} setUser={setUser} />;
+        default: return <Home setPage={handlePageChange} />;
     }
   };
 
@@ -442,6 +497,11 @@ function App() {
       
       {!showSplash && !isAuthenticated && (
           <SignIn onLogin={handleLogin} />
+      )}
+
+      {/* SECURITY SHUTTER LAYER */}
+      {!showSplash && isAuthenticated && (
+          <SecurityShutter status={transitionStatus} />
       )}
 
       {!showSplash && isAuthenticated && (
@@ -457,12 +517,12 @@ function App() {
                 {modalConfig.content}
             </Modal>
 
-            <div className={`animate-in fade-in duration-700 ${showOnboarding || modalConfig.isOpen ? 'blur-sm' : ''}`}>
-                <Navbar activePage={activePage} setPage={setActivePage} user={user} isAuthenticated={isAuthenticated} />
+            <div className={`transition-opacity duration-300 ${showOnboarding || modalConfig.isOpen ? 'blur-sm' : ''}`}>
+                <Navbar activePage={activePage} setPage={handlePageChange} user={user} isAuthenticated={isAuthenticated} />
                 <main className="flex-grow">
                     {renderPage()}
                 </main>
-                <Footer setPage={setActivePage} activePage={activePage} openModal={openModal} />
+                <Footer setPage={handlePageChange} activePage={activePage} openModal={openModal} />
             </div>
         </>
       )}
