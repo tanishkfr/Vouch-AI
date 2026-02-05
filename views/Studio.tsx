@@ -10,51 +10,29 @@ interface StudioProps {
     setStudioState: React.Dispatch<React.SetStateAction<StudioState>>;
 }
 
-// 1. EXPANDED RISK ENGINE DATA POOL
 const RISK_DATA: Record<Severity, { transcript: string; reason: string }[]> = {
     red: [
         { transcript: "We should just go out and [bleep] everyone who disagrees.", reason: "Incitement to violence detected." },
         { transcript: "The vaccine is actually made of microchips and poison.", reason: "Dangerous medical misinformation." },
         { transcript: "I hate [Group X], they are the root of all evil.", reason: "Hate speech pattern matching." },
         { transcript: "Go drink bleach, it cures everything instantly.", reason: "Self-harm encouragement." },
-        { transcript: "That CEO is a pedophile, I have the files right here.", reason: "Defamation liability (High)." },
-        { transcript: "Let's burn down the courthouse tonight.", reason: "Specific threat of violence." },
-        { transcript: "Women shouldn't be allowed to [bleep].", reason: "Gender-based discrimination." },
-        { transcript: "This stock is guaranteed to double by Friday, buy now!", reason: "Financial fraud / Pump & Dump." },
-        { transcript: "I hope he dies in a fire, honestly.", reason: "Targeted harassment." },
-        { transcript: "Just steal the credit card numbers, it's easy.", reason: "Promoting illegal acts." },
-        { transcript: "[Bleep] the police, let's start a riot.", reason: "Incitement to civil unrest." },
-        { transcript: "Hitler actually had some good ideas about [bleep].", reason: "Extremist ideology." },
-        { transcript: "The election was rigged by lizard people.", reason: "Election integrity violation." },
-        { transcript: "Send me $500 and I'll double it in an hour.", reason: "Scam / Phishing pattern." },
-        { transcript: "If you see him, punch him in the throat.", reason: "Call to physical violence." },
-        { transcript: "Cancer is a fungus you can cure with baking soda.", reason: "Life-threatening health misinfo." },
-        { transcript: "The holocaust never happened, look at the data.", reason: "History denial / Hate speech." },
-        { transcript: "All [Nationality] are thieves and liars.", reason: "Racist generalization." },
-        { transcript: "Upload their home address to the forum.", reason: "Doxxing / Privacy violation." },
-        { transcript: "You can make a bomb with household items like...", reason: "Dangerous instructional content." }
+        { transcript: "That CEO is a pedophile, I have the files right here.", reason: "Defamation liability (High)." }
     ],
     orange: [
         { transcript: "You'll never believe what [Brand] puts in their food.", reason: "Potential trade libel." },
         { transcript: "This is financial advice: buy crypto now.", reason: "Regulated advice violation." },
         { transcript: "I'm going to release the private emails.", reason: "Privacy concern." },
-        { transcript: "This product is absolute garbage, don't buy it.", reason: "Brand safety conflict." },
-        { transcript: "Gambling is the only way to get rich quick.", reason: "Gambling promotion (Restricted)." },
-        { transcript: "Cannabis is basically a vitamin, take it daily.", reason: "Controlled substance discussion." }
+        { transcript: "This product is absolute garbage, don't buy it.", reason: "Brand safety conflict." }
     ],
     yellow: [
         { transcript: "He's such an idiot.", reason: "Insult / toxicity." },
         { transcript: "This movie sucks.", reason: "Strong negative opinion." },
-        { transcript: "The government is run by clowns.", reason: "Political satire." },
-        { transcript: "Living in New York is like living in a trash can.", reason: "Geographic roast." },
-        { transcript: "Android users are just confused people.", reason: "Tech tribalism." }
+        { transcript: "The government is run by clowns.", reason: "Political satire." }
     ],
     blue: [
         { transcript: "9 out of 10 dentists recommend it.", reason: "Citation check needed." },
         { transcript: "It happened in 2020.", reason: "Fact check verification." },
-        { transcript: "GDP grew by 4.5% last quarter.", reason: "Economic claim check." },
-        { transcript: "Tesla stock is up 200% this year.", reason: "Market data verification." },
-        { transcript: "Water boils at 100 degrees Celsius.", reason: "Scientific claim." }
+        { transcript: "GDP grew by 4.5% last quarter.", reason: "Economic claim check." }
     ]
 };
 
@@ -86,7 +64,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
 
     // Mock Scanning Logic
     const startScan = (file: File) => {
-        // Reset flags and export state on new scan
         setStudioState(prev => ({ 
             ...prev, 
             status: 'analyzing', 
@@ -112,7 +89,7 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
     };
 
     const completeScan = () => {
-        // Generate NEW random flags for this specific scan
+        // Generate NEW random flags
         const newFlags: Flag[] = [];
         const numFlags = Math.floor(Math.random() * 5) + 3; // 3 to 7 flags
         const usedHashes = new Set();
@@ -120,15 +97,14 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
         for (let i = 0; i < numFlags; i++) {
             const severityRoll = Math.random();
             let severity: 'red' | 'orange' | 'yellow' | 'blue' = 'blue';
-            if (severityRoll > 0.9) severity = 'red';
-            else if (severityRoll > 0.7) severity = 'orange';
-            else if (severityRoll > 0.4) severity = 'yellow';
+            if (severityRoll > 0.8) severity = 'red';
+            else if (severityRoll > 0.6) severity = 'orange';
+            else if (severityRoll > 0.3) severity = 'yellow';
 
             const pool = RISK_DATA[severity];
             const item = pool[Math.floor(Math.random() * pool.length)];
-
-            // Avoid duplicates in same scan
             const hash = item.transcript;
+            
             if (usedHashes.has(hash)) continue;
             usedHashes.add(hash);
 
@@ -145,7 +121,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
             });
         }
 
-        // Generate waveform bars
         const bars = Array.from({ length: 80 }, () => Math.floor(Math.random() * 80) + 10);
 
         setStudioState(prev => ({
@@ -176,16 +151,15 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
             ...prev,
             flags: prev.flags.filter(f => f.id !== id)
         }));
+        showToast("Integrity Restored. 🌶️");
     };
 
     const handleFix = (id: string) => {
-        // Set processing state first
         setStudioState(prev => ({
             ...prev,
             flags: prev.flags.map(f => f.id === id ? { ...f, status: 'processing' } : f)
         }));
 
-        // Delay for simulation
         setTimeout(() => {
             setStudioState(prev => ({
                 ...prev,
@@ -199,7 +173,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
         setIsNuking(true);
         setNukeProgress(0);
 
-        // Animate scrub progress over 1.5s
         const duration = 1500;
         const start = performance.now();
 
@@ -211,11 +184,9 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
             if (p < 1) {
                 requestAnimationFrame(frame);
             } else {
-                // Done
                 setIsNuking(false);
                 setStudioState(prev => ({
                     ...prev,
-                    // Remove Red and Orange flags completely
                     flags: prev.flags.filter(f => f.severity !== 'red' && f.severity !== 'orange')
                 }));
                 showToast("Integrity Restored. 🌶️");
@@ -230,7 +201,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
     };
 
     const triggerExport = (id: string) => {
-        // 2. DOWNLOAD STATE
         if(readyExportId === id) {
             const link = document.createElement("a");
             link.href = "#";
@@ -238,18 +208,15 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            // Reset after download
             setReadyExportId(null);
             return;
         }
 
-        // 1. PROCESSING STATE
         setProcessingExportId(id);
         setTimeout(() => {
             setProcessingExportId(null);
             setReadyExportId(id);
-        }, 2000); // 2 second mock processing time
+        }, 2000); 
     };
 
     const handleResetExport = (e: React.MouseEvent, id: string) => {
@@ -271,7 +238,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
              
              <div className="max-w-7xl mx-auto">
                 
-                {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
@@ -285,7 +251,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                         </h1>
                     </div>
                     
-                    {/* Platform Toggles */}
                     <div className="bg-white p-2 rounded-full shadow-lg border-2 border-black/5 flex gap-2">
                         {(['YouTube', 'Spotify', 'General'] as Platform[]).map(p => (
                             <button
@@ -311,7 +276,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                     )}
                 </div>
 
-                {/* Main Content Area */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* LEFT COLUMN: Waveform & Upload */}
@@ -440,7 +404,6 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                         <div className="bg-[#1A1A1A] rounded-[2.5rem] p-6 min-h-[600px] flex flex-col relative overflow-hidden">
                              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
-                             {/* Analysis Header with Nuke Button */}
                              <div className="flex flex-col gap-4 mb-8 relative z-10">
                                  <div className="flex items-center justify-between">
                                     <h3 className="text-2xl font-black text-white">Analysis Log</h3>

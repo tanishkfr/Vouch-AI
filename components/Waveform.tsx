@@ -35,7 +35,7 @@ export const Waveform: React.FC<WaveformProps> = ({
             clearInterval(interval);
             return 100;
           }
-          return prev + 1; // Faster scan for UX
+          return prev + 1;
         });
       }, 20); 
     } else if (!scanComplete) {
@@ -44,13 +44,11 @@ export const Waveform: React.FC<WaveformProps> = ({
     return () => clearInterval(interval);
   }, [isScanning, scanComplete]);
 
-  // Map flags to bar indices (0 to 80)
   const getFlagForBar = (index: number) => {
     if (!scanComplete) return null;
     const totalBars = bars.length;
     const percentage = (index / totalBars) * 100;
     
-    // Find flag within +/- 1.5% of this bar's position
     return flags.find(f => {
         if (f.status === 'resolved') return false;
         const flagPerc = (f.seconds / 1800) * 100; 
@@ -81,7 +79,6 @@ export const Waveform: React.FC<WaveformProps> = ({
       <div className="w-full h-full flex items-center justify-between gap-1 z-10" onMouseLeave={() => setHoveredIndex(null)}>
         {bars.map((height, i) => {
            const flag = getFlagForBar(i);
-           // If nuking, red flags disappear as the bar passes
            const isFlagNuked = isNuking && flag && (flag.severity === 'red' || flag.severity === 'orange') && nukeProgress > (i / bars.length) * 100;
            
            return (
@@ -103,13 +100,11 @@ export const Waveform: React.FC<WaveformProps> = ({
         })}
       </div>
 
-      {/* Progress Overlay (Scanning) */}
       {isScanning && (
         <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] rounded-[2rem] pointer-events-none" 
              style={{ clipPath: `inset(0 0 0 ${scanProgress}%)`, transition: 'clip-path 0.05s linear' }} />
       )}
 
-      {/* NUKE WIPE OVERLAY */}
       {isNuking && (
           <div className="absolute inset-0 bg-[#F0543C]/20 rounded-[2rem] pointer-events-none z-20 flex items-center"
                style={{ 
@@ -121,7 +116,6 @@ export const Waveform: React.FC<WaveformProps> = ({
           </div>
       )}
 
-      {/* Tooltip */}
       {hoveredFlag && !isNuking && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white text-[#1A1A1A] px-6 py-3 rounded-xl shadow-2xl z-50 animate-in zoom-in-95 pointer-events-none border-2 border-black whitespace-nowrap">
             <div className="flex items-center gap-3">

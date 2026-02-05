@@ -22,11 +22,9 @@ export const FlagCard: React.FC<FlagCardProps> = ({ flag, onNuke, onFix }) => {
     red: 'bg-red-50 text-red-600',
   };
 
-  // Enhanced feedback for resolved state (Fade out logic)
   if (isResolved) {
       return (
         <div className="h-0 opacity-0 overflow-hidden transition-all duration-700 ease-in-out">
-            {/* Collapse element gracefully */}
         </div>
       );
   }

@@ -48,7 +48,6 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       <div className="relative w-full max-w-7xl h-[400px] flex items-center justify-center">
         
         {/* Layer 1: Glitchy Wireframe (Underneath) */}
-        {/* This layer is always visible but obscured by the scan line reveal */}
         <div className="absolute inset-0 flex items-center justify-center select-none opacity-40">
            <h1 
              className="text-[15vw] md:text-[12rem] font-black tracking-tighter leading-none text-transparent animate-pulse"
@@ -83,7 +82,6 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
                 transition: 'opacity 0.2s'
             }}
         >
-            {/* Data Noise Trail */}
             <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-[#F0543C]/30 to-transparent pointer-events-none"></div>
         </div>
 
@@ -176,7 +174,6 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
   const handleDirectEntry = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Mimic processing delay
     setTimeout(() => {
         onLogin(nameInput || "Tanishk"); 
     }, 800);
@@ -191,13 +188,11 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
 
   return (
     <div className="min-h-screen bg-[#F5F1E6] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        {/* Abstract Background Elements */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="relative z-10 w-full max-w-md animate-in slide-in-from-bottom-8 fade-in duration-700">
             <div className="bg-white rounded-[2.5rem] shadow-[16px_16px_0px_rgba(26,26,26,0.05)] border-4 border-white p-8 md:p-10 text-center">
                 
-                {/* Brand Header */}
                 <div className="flex flex-col items-center mb-10">
                     <div className="w-16 h-16 bg-[#1A1A1A] rounded-2xl flex items-center justify-center text-[#F0543C] shadow-lg transform -rotate-3 mb-4">
                         <Fingerprint size={32} />
@@ -207,30 +202,17 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
                 </div>
 
                 <div className="space-y-4">
-                    {/* Google Button */}
                     <button 
                         onClick={handleSocialLogin}
                         className="w-full bg-white hover:bg-gray-50 text-[#1A1A1A] font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95 border-2 border-gray-200 hover:border-gray-300"
                     >
-                        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                            <g transform="matrix(1, 0, 0, 1, 0, 0)">
-                                <path fill="#4285F4" d="M23.745,12.27c0-0.743-0.067-1.462-0.189-2.162H12.225v4.09h6.457c-0.279,1.504-1.127,2.778-2.396,3.633v3.016h3.879C22.435,18.728,23.745,15.719,23.745,12.27z"/>
-                                <path fill="#34A853" d="M12.225,24c3.24,0,5.957-1.074,7.942-2.906l-3.879-3.016c-1.075,0.721-2.451,1.146-4.063,1.146c-3.124,0-5.772-2.111-6.72-4.953H1.549v3.116C3.513,21.289,7.568,24,12.225,24z"/>
-                                <path fill="#FBBC05" d="M5.505,14.271c-0.24-0.72-0.377-1.49-0.377-2.271s0.137-1.551,0.377-2.271V6.613H1.549c-1.786,3.56-1.786,7.777,0,11.336L5.505,14.271z"/>
-                                <path fill="#EA4335" d="M12.225,4.75c1.761,0,3.344,0.613,4.587,1.801l3.44-3.44C18.177,1.143,15.358,0,12.225,0C7.568,0,3.513,2.711,1.549,6.613l3.956,3.116C6.453,6.861,9.101,4.75,12.225,4.75z"/>
-                            </g>
-                        </svg>
                         Continue with Google
                     </button>
 
-                    {/* Apple Button (Official Solid Logo) */}
                     <button 
                         onClick={handleSocialLogin}
                         className="w-full bg-black text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95 border-2 border-black hover:bg-gray-900"
                     >
-                         <svg width="20" height="20" viewBox="0 0 384 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z"/>
-                        </svg>
                         Continue with Apple
                     </button>
 
@@ -243,7 +225,6 @@ const SignIn = ({ onLogin }: { onLogin: (name: string) => void }) => {
                         </div>
                     </div>
 
-                    {/* Direct Entry Form */}
                     <form onSubmit={handleDirectEntry} className="space-y-3">
                          <input 
                             type="text" 
@@ -360,13 +341,11 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [activePage, setActivePageState] = useState<'home' | 'spectrum' | 'studio' | 'contact' | 'profile'>('home');
 
-  // GLOBAL IDENTITY STATE
   const [user, setUser] = useState<UserProfile>({
-    name: '', // Empty until login
-    role: 'HCD / UI UX Design', // Default Credential
+    name: '',
+    role: 'HCD / UI UX Design',
   });
 
-  // PERSISTENT STUDIO STATE
   const [studioState, setStudioState] = useState<StudioState>({
     file: null,
     status: 'idle',
@@ -383,7 +362,6 @@ function App() {
   };
 
   const handleLogin = (name: string) => {
-      // Live Identity Update
       setUser(prev => ({ ...prev, name: name }));
       setIsAuthenticated(true);
       setShowOnboarding(true);
@@ -410,18 +388,14 @@ function App() {
     <div className="min-h-screen bg-[#F5F1E6] flex flex-col font-[Plus Jakarta Sans] overflow-x-hidden selection:bg-[#F0543C] selection:text-white cursor-none">
       <FocusCursor />
       
-      {/* 1. SPLASH SCREEN */}
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       
-      {/* 2. SIGN IN GATEWAY (Front Door) */}
       {!showSplash && !isAuthenticated && (
           <SignIn onLogin={handleLogin} />
       )}
 
-      {/* 3. MAIN APP (Protected) */}
       {!showSplash && isAuthenticated && (
         <>
-            {/* Onboarding Overlay */}
             {showOnboarding && <OnboardingTour user={user} onClose={() => setShowOnboarding(false)} />}
             
             <div className={`animate-in fade-in duration-700 ${showOnboarding ? 'blur-md pointer-events-none' : ''}`}>
