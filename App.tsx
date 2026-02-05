@@ -66,6 +66,13 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
     <div 
       className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden transition-all duration-300`}
     >
+      {/* HEADER TEXT: VOUCHING... */}
+      <div className={`absolute top-12 left-0 w-full text-center transition-opacity duration-300 z-50 ${phase === 'exiting' ? 'opacity-0' : 'opacity-100'}`}>
+          <span className="font-mono text-[#E86D44] font-bold tracking-[0.5em] text-xs animate-pulse">
+              VOUCHING...
+          </span>
+      </div>
+
       {/* BACKGROUND ELEMENTS */}
       <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#E86D44]/10 to-transparent opacity-0 transition-opacity duration-1000 ${phase !== 'idle' ? 'opacity-100' : ''}`}></div>
       
