@@ -30,70 +30,96 @@ const AppleIcon = () => (
 // --- ASSET: FINGERPRINT BRAND LOGO ---
 // Updated to EXACTLY match Navbar style: Black circle, white border, orange fingerprint
 const FingerprintBrandLogo = ({ className }: { className?: string }) => (
-  <div className={`bg-[#1A1A1A] rounded-full flex items-center justify-center border-4 md:border-[6px] border-white shadow-sm overflow-hidden ${className}`}>
+  <div className={`bg-[#1A1A1A] rounded-full flex items-center justify-center border-4 md:border-[6px] border-white shadow-sm overflow-hidden z-20 relative ${className}`}>
     <Fingerprint className="w-[60%] h-[60%] text-[#E86D44]" strokeWidth={2.5} />
   </div>
 );
 
-// --- COMPONENT: BOUNCY NEURAL SPLASH ---
+// --- COMPONENT: BIOMETRIC UNLOCK SPLASH ---
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const [isExiting, setIsExiting] = useState(false);
-  const [statusText, setStatusText] = useState("ESTABLISHING BIOMETRIC INTEGRITY...");
+  const [phase, setPhase] = useState<'idle' | 'scanning' | 'success' | 'exiting'>('idle');
 
   useEffect(() => {
     // REMOVE STATIC SPLASH IF EXISTS
     const staticSplash = document.getElementById('fail-safe-splash');
     if (staticSplash) {
+        staticSplash.style.transition = 'opacity 0.5s';
         staticSplash.style.opacity = '0';
         setTimeout(() => staticSplash.remove(), 500);
     }
 
-    const duration = 2800;
-    
-    // Simulate scan success
-    setTimeout(() => {
-        setStatusText("ESTABLISHING BIOMETRIC INTEGRITY... [SUCCESS]");
-    }, 2000);
+    // Sequence Timing
+    const scanTimer = setTimeout(() => setPhase('scanning'), 1000); // Start Scan after 1s
+    const successTimer = setTimeout(() => setPhase('success'), 2800); // Scan finishes
+    const exitTimer = setTimeout(() => setPhase('exiting'), 3500); // Trigger shockwave
+    const completeTimer = setTimeout(onComplete, 4200); // Unmount
 
-    // Trigger exit
-    setTimeout(() => {
-        setIsExiting(true);
-        setTimeout(onComplete, 800); // Wait for transition
-    }, duration);
-
+    return () => {
+      clearTimeout(scanTimer);
+      clearTimeout(successTimer);
+      clearTimeout(exitTimer);
+      clearTimeout(completeTimer);
+    };
   }, [onComplete]);
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden transition-all duration-[800ms] cubic-bezier(0.76, 0, 0.24, 1) ${isExiting ? '-translate-y-full opacity-100' : 'translate-y-0 opacity-100'}`}
+      className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden transition-all duration-300`}
     >
-      {/* Floating Background Elements */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#E86D44] rounded-full mix-blend-screen opacity-5 blur-3xl animate-float" style={{ animationDelay: '0s' }}></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#E86D44] rounded-full mix-blend-screen opacity-5 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-
-      {/* Centered Brand Stack */}
-      <div className="relative z-30 flex flex-col items-center mb-8">
+      {/* BACKGROUND ELEMENTS */}
+      <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#E86D44]/10 to-transparent opacity-0 transition-opacity duration-1000 ${phase !== 'idle' ? 'opacity-100' : ''}`}></div>
+      
+      {/* MAIN CONTAINER THAT WILL SHOCKWAVE */}
+      <div className={`relative flex flex-col items-center justify-center transition-transform duration-[800ms] cubic-bezier(0.7, 0, 0.3, 1) ${phase === 'exiting' ? 'scale-[50] opacity-0' : 'scale-100'}`}>
           
-          {/* Logo with Bounce & Float */}
-          <div className="animate-bounce-in">
-              <div className="w-32 h-32 md:w-48 md:h-48 mb-8 animate-float">
-                  <FingerprintBrandLogo className="w-full h-full drop-shadow-[0_20px_50px_rgba(232,109,68,0.3)]" />
-              </div>
+          {/* LOGO WRAPPER */}
+          <div className="relative w-40 h-40 md:w-56 md:h-56">
+              
+              {/* Pulse Glow (Idle) */}
+              <div className={`absolute inset-0 bg-[#E86D44] rounded-full blur-2xl transition-all duration-1000 ${phase === 'idle' ? 'animate-pulse opacity-40 scale-110' : 'opacity-0 scale-100'}`}></div>
+              
+              {/* Success Burst (Success) */}
+              <div className={`absolute inset-0 bg-white rounded-full blur-xl transition-all duration-300 ${phase === 'success' ? 'opacity-80 scale-125' : 'opacity-0 scale-100'}`}></div>
+
+              {/* Central Logo */}
+              <FingerprintBrandLogo className="w-full h-full" />
+
+              {/* Scanning Overlay */}
+              {phase === 'scanning' && (
+                  <div className="absolute inset-0 z-30 rounded-full overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-transparent to-[#E86D44]/50 border-b-4 border-[#E86D44] animate-scan drop-shadow-[0_0_10px_#E86D44]"></div>
+                  </div>
+              )}
           </div>
 
-          {/* Typography Container */}
-          <div className="relative animate-bounce-in" style={{ animationDelay: '0.2s' }}>
-              <h1 className="text-[15vw] md:text-[12rem] font-black tracking-tighter leading-none text-white drop-shadow-2xl">
-                  VOUCH
-              </h1>
+          {/* STATUS TEXT */}
+          <div className="mt-12 h-8 flex flex-col items-center justify-center overflow-hidden">
+             <div className="font-mono font-bold tracking-[0.2em] text-sm md:text-base transition-all duration-300">
+                {phase === 'idle' && (
+                   <span className="text-gray-500 animate-pulse">INITIALIZING SYSTEM...</span>
+                )}
+                {phase === 'scanning' && (
+                   <span className="text-[#E86D44]">BIOMETRIC SYNC: <span className="inline-block w-8 text-left animate-pulse">Running...</span></span>
+                )}
+                {(phase === 'success' || phase === 'exiting') && (
+                   <span className="text-white bg-[#7BC65C] text-[#1A1A1A] px-3 py-1 rounded-sm animate-in zoom-in duration-200">IDENTITY CONFIRMED</span>
+                )}
+             </div>
           </div>
       </div>
 
-      {/* Status Text - Monospace */}
-      <div className="absolute bottom-12 font-mono text-[#E86D44] text-xs md:text-sm font-bold tracking-widest flex items-center gap-3">
-         <span className="w-2 h-2 bg-[#E86D44] animate-ping"></span>
-         {statusText}
-      </div>
+      {/* CSS FOR SCAN LINE */}
+      <style>{`
+        @keyframes scan {
+          0% { transform: translateY(-100%); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(200%); opacity: 0; }
+        }
+        .animate-scan {
+          animation: scan 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+        }
+      `}</style>
     </div>
   );
 };

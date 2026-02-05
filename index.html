@@ -57,7 +57,7 @@
         animation: float 6s ease-in-out infinite;
       }
 
-      /* FAIL-SAFE STATIC SPLASH */
+      /* FAIL-SAFE STATIC SPLASH - BIOMETRIC THEME */
       #fail-safe-splash {
         position: fixed;
         top: 0;
@@ -73,18 +73,48 @@
         transition: opacity 0.5s ease-out;
       }
       
-      .loader-pulse {
-        width: 60px;
-        height: 60px;
-        background-color: #E86D44;
+      /* Static representation of the Fingerprint Logo */
+      .biometric-loader {
+        width: 120px;
+        height: 120px;
+        background-color: #1A1A1A;
+        border: 6px solid #FFFFFF;
         border-radius: 50%;
-        animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 30px rgba(232, 109, 68, 0.2);
+        animation: bio-breath 2s ease-in-out infinite;
       }
 
-      @keyframes pulse-ring {
-        0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(232, 109, 68, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(232, 109, 68, 0); }
-        100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(232, 109, 68, 0); }
+      .biometric-icon {
+        width: 70px;
+        height: 70px;
+        color: #E86D44;
+      }
+
+      @keyframes bio-breath {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(232, 109, 68, 0.2); }
+        50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(232, 109, 68, 0.6); }
+      }
+
+      .status-text {
+        font-family: 'JetBrains Mono', monospace;
+        color: #E86D44;
+        margin-top: 30px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        animation: text-flicker 2s infinite;
+      }
+
+      @keyframes text-flicker {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+        52% { opacity: 1; }
+        54% { opacity: 0.7; }
+        56% { opacity: 1; }
       }
     </style>
   <script type="importmap">
@@ -102,8 +132,19 @@
     <!-- FAIL-SAFE STATIC CONTENT (Removed by React on hydration) -->
     <div id="root">
         <div id="fail-safe-splash">
-             <div class="loader-pulse"></div>
-             <p style="color: #E86D44; font-family: 'JetBrains Mono', monospace; margin-top: 20px; font-weight: bold; letter-spacing: 2px;">ESTABLISHING BIOMETRIC INTEGRITY...</p>
+             <div class="biometric-loader">
+                <!-- Simple SVG Fingerprint for static state -->
+                <svg class="biometric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 10a2 2 0 0 0-2 2c0 1.07.93 2 2 2s2-.93 2-2a2 2 0 0 0-2-2Z"/>
+                  <path d="M19.07 4.93L17.07 6.34C17.46 6.89 17.77 7.5 17.97 8.15"/>
+                  <path d="M14.31 4L13.7 6.46"/>
+                  <path d="M9.69 4L10.3 6.46"/>
+                  <path d="M4.93 4.93L6.93 6.34C6.54 6.89 6.23 7.5 6.03 8.15"/>
+                  <path d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+                  <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/>
+                </svg>
+             </div>
+             <p class="status-text">INITIALIZING SYSTEM...</p>
         </div>
     </div>
     <script type="module" src="./index.tsx"></script>
