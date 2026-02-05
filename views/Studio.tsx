@@ -37,25 +37,47 @@ const RISK_DATA: Record<Severity, { transcript: string; reason: string }[]> = {
     orange: [
         { transcript: "You'll never believe what [Brand] puts in their food.", reason: "Potential trade libel." },
         { transcript: "This is financial advice: buy crypto now.", reason: "Regulated advice violation." },
-        { transcript: "I'm going to release the private emails.", reason: "Privacy concern." }
+        { transcript: "I'm going to release the private emails.", reason: "Privacy concern." },
+        { transcript: "This product is absolute garbage, don't buy it.", reason: "Brand safety conflict." },
+        { transcript: "Gambling is the only way to get rich quick.", reason: "Gambling promotion (Restricted)." },
+        { transcript: "Cannabis is basically a vitamin, take it daily.", reason: "Controlled substance discussion." }
     ],
     yellow: [
         { transcript: "He's such an idiot.", reason: "Insult / toxicity." },
-        { transcript: "This movie sucks.", reason: "Strong negative opinion." }
+        { transcript: "This movie sucks.", reason: "Strong negative opinion." },
+        { transcript: "The government is run by clowns.", reason: "Political satire." },
+        { transcript: "Living in New York is like living in a trash can.", reason: "Geographic roast." },
+        { transcript: "Android users are just confused people.", reason: "Tech tribalism." }
     ],
     blue: [
         { transcript: "9 out of 10 dentists recommend it.", reason: "Citation check needed." },
-        { transcript: "It happened in 2020.", reason: "Fact check verification." }
+        { transcript: "It happened in 2020.", reason: "Fact check verification." },
+        { transcript: "GDP grew by 4.5% last quarter.", reason: "Economic claim check." },
+        { transcript: "Tesla stock is up 200% this year.", reason: "Market data verification." },
+        { transcript: "Water boils at 100 degrees Celsius.", reason: "Scientific claim." }
     ]
 };
 
 export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [dragActive, setDragActive] = useState(false);
+    
+    // Local state for export progress tracking
+    const [processingExportId, setProcessingExportId] = useState<string | null>(null);
+    const [readyExportId, setReadyExportId] = useState<string | null>(null);
 
     // Mock Scanning Logic
     const startScan = (file: File) => {
-        setStudioState(prev => ({ ...prev, status: 'analyzing', file, progress: 0 }));
+        // Reset flags and export state on new scan
+        setStudioState(prev => ({ 
+            ...prev, 
+            status: 'analyzing', 
+            file, 
+            progress: 0,
+            flags: [] 
+        }));
+        setReadyExportId(null);
+        setProcessingExportId(null);
         
         // Simulate progress
         let progress = 0;
@@ -66,13 +88,14 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                 clearInterval(interval);
                 completeScan();
             }
-        }, 50);
+        }, 40);
     };
 
     const completeScan = () => {
-        // Generate random flags
+        // Generate NEW random flags for this specific scan
         const newFlags: Flag[] = [];
         const numFlags = Math.floor(Math.random() * 5) + 3; // 3 to 7 flags
+        const usedHashes = new Set();
         
         for (let i = 0; i < numFlags; i++) {
             const severityRoll = Math.random();
@@ -83,6 +106,11 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
 
             const pool = RISK_DATA[severity];
             const item = pool[Math.floor(Math.random() * pool.length)];
+
+            // Avoid duplicates in same scan
+            const hash = item.transcript;
+            if (usedHashes.has(hash)) continue;
+            usedHashes.add(hash);
 
             newFlags.push({
                 id: Math.random().toString(36).substr(2, 9),
@@ -137,12 +165,41 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
         }));
     };
 
+    const triggerExport = (id: string) => {
+        // 2. DOWNLOAD STATE
+        if(readyExportId === id) {
+            const link = document.createElement("a");
+            link.href = "#";
+            link.download = `VOUCH_Report_${id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Reset after download
+            setReadyExportId(null);
+            return;
+        }
+
+        // 1. PROCESSING STATE
+        setProcessingExportId(id);
+        setTimeout(() => {
+            setProcessingExportId(null);
+            setReadyExportId(id);
+        }, 2000); // 2 second mock processing time
+    };
+
+    const themeColors: Record<Platform, string> = {
+        YouTube: '#FF0000',
+        Spotify: '#1DB954',
+        General: '#1A1A1A' 
+    };
+
     return (
         <div className="w-full pt-32 pb-20 px-6 min-h-screen">
              <div className="max-w-7xl mx-auto">
                 
                 {/* Header */}
-                <div className="flex justify-between items-end mb-12">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                              <div className="bg-[#F0543C] text-white px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">
@@ -155,15 +212,29 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                         </h1>
                     </div>
                     
+                    {/* Platform Toggles */}
+                    <div className="bg-white p-2 rounded-full shadow-lg border-2 border-black/5 flex gap-2">
+                        {(['YouTube', 'Spotify', 'General'] as Platform[]).map(p => (
+                            <button
+                                key={p}
+                                onClick={() => setStudioState(prev => ({ ...prev, platform: p }))}
+                                className={`px-6 py-3 rounded-full font-black text-sm uppercase transition-all duration-300 ${
+                                    studioState.platform === p 
+                                    ? 'text-white shadow-md scale-105' 
+                                    : 'text-gray-400 hover:text-[#1A1A1A]'
+                                }`}
+                                style={{ backgroundColor: studioState.platform === p ? themeColors[p] : 'transparent' }}
+                                data-cursor="hover"
+                            >
+                                {p}
+                            </button>
+                        ))}
+                    </div>
+
                     {studioState.status === 'complete' && (
-                        <div className="flex gap-4">
-                            <Button variant="neutral" icon={<RefreshCw size={18} />} onClick={() => setStudioState(prev => ({ ...prev, status: 'idle', flags: [] }))}>
-                                New Scan
-                            </Button>
-                            <Button variant="primary" icon={<Download size={18} />}>
-                                Export Report
-                            </Button>
-                        </div>
+                        <Button variant="neutral" icon={<RefreshCw size={18} />} onClick={() => setStudioState(prev => ({ ...prev, status: 'idle', flags: [] }))}>
+                            New Scan
+                        </Button>
                     )}
                 </div>
 
@@ -174,12 +245,14 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                     <div className="lg:col-span-2 space-y-8">
                         {studioState.status === 'idle' ? (
                             <div 
-                                className={`border-4 border-dashed rounded-[2.5rem] h-96 flex flex-col items-center justify-center transition-all duration-300 ${dragActive ? 'border-[#F0543C] bg-[#F0543C]/5 scale-[0.99]' : 'border-gray-300 hover:border-gray-400 bg-white'}`}
+                                className={`border-4 border-dashed rounded-[2.5rem] h-96 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${dragActive ? 'border-[#F0543C] bg-[#F0543C]/5 scale-[0.99]' : 'border-gray-300 hover:border-gray-400 bg-white'}`}
                                 onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                                 onDragLeave={() => setDragActive(false)}
                                 onDrop={handleFileDrop}
+                                onClick={() => fileInputRef.current?.click()}
+                                data-cursor="hover"
                             >
-                                <div className="w-24 h-24 bg-[#1A1A1A] rounded-full flex items-center justify-center text-white mb-6 shadow-xl">
+                                <div className="w-24 h-24 bg-[#1A1A1A] rounded-full flex items-center justify-center text-white mb-6 shadow-xl animate-bounce">
                                     <Upload size={40} />
                                 </div>
                                 <h3 className="text-2xl font-black text-[#1A1A1A] mb-2">Drop Audio Here</h3>
@@ -191,7 +264,7 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                                     accept="audio/*" 
                                     onChange={handleFileInput} 
                                 />
-                                <Button onClick={() => fileInputRef.current?.click()} variant="secondary">
+                                <Button variant="secondary">
                                     Select File
                                 </Button>
                             </div>
@@ -201,7 +274,7 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                                     isScanning={studioState.status === 'analyzing'} 
                                     scanComplete={studioState.status === 'complete'} 
                                     flags={studioState.flags} 
-                                    themeColor="#F0543C" 
+                                    themeColor={themeColors[studioState.platform]} 
                                     bars={studioState.waveformBars} 
                                 />
                                 
@@ -224,6 +297,53 @@ export const Studio: React.FC<StudioProps> = ({ studioState, setStudioState }) =
                                         </div>
                                     )}
                                 </div>
+
+                                {/* EXPORT ACTIONS */}
+                                {studioState.status === 'complete' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-bottom-4">
+                                        {[
+                                            { id: 'clean', label: studioState.platform === 'YouTube' ? 'Clean Video Feed' : 'Clean Master Audio', icon: <Mic /> },
+                                            { id: 'overlay', label: studioState.platform === 'YouTube' ? 'Burn-in Overlays' : 'Show Notes Transcript', icon: <Type /> },
+                                            { id: 'meta', label: studioState.platform === 'YouTube' ? 'YouTube Metadata' : 'Ad-Marker Export', icon: <Info /> }
+                                        ].map(opt => {
+                                            const isProcessing = processingExportId === opt.id;
+                                            const isReady = readyExportId === opt.id;
+                                            return (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => triggerExport(opt.id)}
+                                                    data-cursor="hover"
+                                                    className={`
+                                                        relative h-24 rounded-2xl border-2 font-bold transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden
+                                                        ${isReady 
+                                                            ? 'bg-[#7BC65C] border-[#7BC65C] text-[#1A1A1A] shadow-[0_0_20px_rgba(123,198,92,0.4)] scale-105 z-10' 
+                                                            : isProcessing 
+                                                                ? 'bg-[#1A1A1A] border-[#1A1A1A] text-white' 
+                                                                : 'bg-white border-transparent hover:border-[#1A1A1A] text-[#1A1A1A] hover:-translate-y-1 shadow-md'
+                                                        }
+                                                    `}
+                                                >
+                                                    {isProcessing ? (
+                                                        <>
+                                                            <Loader2 className="animate-spin" />
+                                                            <span className="text-xs uppercase tracking-widest">Processing...</span>
+                                                        </>
+                                                    ) : isReady ? (
+                                                        <div className="animate-in fade-in zoom-in duration-300 flex flex-col items-center">
+                                                            <Download className="animate-bounce" />
+                                                            <span className="text-xs font-black uppercase tracking-widest mt-1">DOWNLOAD NOW</span>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            {opt.icon}
+                                                            <span className="text-sm">{opt.label}</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

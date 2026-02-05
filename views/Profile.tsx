@@ -14,6 +14,9 @@ export const Profile: React.FC<ProfileProps> = ({ setPage, user, setUser }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [activeChannel, setActiveChannel] = useState<'YouTube' | 'Spotify' | null>(null);
 
+    // Hardcoded Default for non-customized state
+    const DEFAULT_INSTITUTE = 'Srishti Manipal Institute of Art, Design and Technology';
+
     // Mock data for the mini-waveform
     const waveformBars = Array.from({ length: 40 }, () => Math.floor(Math.random() * 60) + 20);
     const mockFlags = [
@@ -30,6 +33,7 @@ export const Profile: React.FC<ProfileProps> = ({ setPage, user, setUser }) => {
     ];
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof UserProfile) => {
+        // Live Update the global state
         setUser(prev => ({ ...prev, [field]: e.target.value }));
     };
 
@@ -68,25 +72,29 @@ export const Profile: React.FC<ProfileProps> = ({ setPage, user, setUser }) => {
                             </div>
                             <div className="flex-1">
                                 {isEditing ? (
-                                    <div className="space-y-2">
+                                    <div className="space-y-4">
                                         <input 
                                             type="text" 
                                             value={user.name} 
                                             onChange={(e) => handleInputChange(e, 'name')}
-                                            className="w-full bg-[#F5F1E6] border-b-2 border-[#1A1A1A] text-2xl font-black p-1 outline-none focus:bg-white transition-colors"
+                                            className="w-full bg-[#F5F1E6] border-b-2 border-[#1A1A1A] text-2xl font-black p-2 rounded outline-none focus:bg-white transition-colors"
+                                            placeholder="Your Name"
                                             autoFocus
                                         />
                                         <input 
                                             type="text" 
                                             value={user.role} 
                                             onChange={(e) => handleInputChange(e, 'role')}
-                                            className="w-full bg-[#F5F1E6] border-b-2 border-[#F0543C] text-xs font-bold uppercase tracking-widest p-1 outline-none text-[#F0543C]"
+                                            className="w-full bg-[#F5F1E6] border-b-2 border-[#F0543C] text-xs font-bold uppercase tracking-widest p-2 rounded outline-none text-[#F0543C]"
+                                            placeholder="Your Role / Institute"
                                         />
                                     </div>
                                 ) : (
                                     <>
                                         <h2 className="text-3xl font-black text-[#1A1A1A] leading-none mb-1">{user.name}</h2>
-                                        <p className="text-[#F0543C] font-bold uppercase tracking-widest text-xs mt-2">HCD / UI UX DESIGN STUDENT</p>
+                                        <p className="text-[#F0543C] font-bold uppercase tracking-widest text-[10px] leading-tight mt-2 line-clamp-2">
+                                            {user.role || DEFAULT_INSTITUTE}
+                                        </p>
                                     </>
                                 )}
                             </div>
@@ -116,6 +124,7 @@ export const Profile: React.FC<ProfileProps> = ({ setPage, user, setUser }) => {
                                     <div 
                                         className={`bg-[#F5F1E6] rounded-2xl p-4 cursor-pointer transition-all duration-300 border-2 ${activeChannel === 'YouTube' ? 'border-[#FF0000] bg-white shadow-xl scale-105' : 'border-transparent hover:bg-white'}`}
                                         onClick={() => toggleChannel('YouTube')}
+                                        data-cursor="hover"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
@@ -153,6 +162,7 @@ export const Profile: React.FC<ProfileProps> = ({ setPage, user, setUser }) => {
                                     <div 
                                         className={`bg-[#F5F1E6] rounded-2xl p-4 cursor-pointer transition-all duration-300 border-2 ${activeChannel === 'Spotify' ? 'border-[#1DB954] bg-white shadow-xl scale-105' : 'border-transparent hover:bg-white'}`}
                                         onClick={() => toggleChannel('Spotify')}
+                                        data-cursor="hover"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
@@ -259,7 +269,10 @@ export const Profile: React.FC<ProfileProps> = ({ setPage, user, setUser }) => {
                 </div>
 
                 {/* Banner */}
-                <div className="bg-[#1A1A1A] rounded-[2.5rem] p-12 text-center text-white relative overflow-hidden group cursor-pointer shadow-[8px_8px_0px_rgba(0,0,0,0.2)] hover:shadow-[12px_12px_0px_rgba(0,0,0,0.2)] hover:translate-y-[-2px] transition-all duration-300 animate-in slide-in-from-bottom-12 fade-in duration-700 delay-500">
+                <div 
+                    className="bg-[#1A1A1A] rounded-[2.5rem] p-12 text-center text-white relative overflow-hidden group cursor-pointer shadow-[8px_8px_0px_rgba(0,0,0,0.2)] hover:shadow-[12px_12px_0px_rgba(0,0,0,0.2)] hover:translate-y-[-2px] transition-all duration-300 animate-in slide-in-from-bottom-12 fade-in duration-700 delay-500"
+                    data-cursor="hover"
+                >
                     <div className="absolute inset-0 bg-gradient-to-r from-[#F0543C] to-[#7BC65C] opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
                     <Award className="w-16 h-16 mx-auto mb-6 text-[#F0543C]" />
                     <h2 className="text-4xl font-black tracking-tighter mb-4">Enterprise Shield Active</h2>
