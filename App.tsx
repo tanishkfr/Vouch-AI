@@ -28,35 +28,43 @@ const AppleIcon = () => (
 );
 
 // --- ASSET: FINGERPRINT BRAND LOGO ---
-// Updated to EXACTLY match Navbar style: Black circle, white border, orange fingerprint
-const FingerprintBrandLogo = ({ className }: { className?: string }) => (
-  <div className={`bg-[#1A1A1A] rounded-full flex items-center justify-center border-4 md:border-[6px] border-white shadow-sm overflow-hidden z-20 relative ${className}`}>
-    <Fingerprint className="w-[60%] h-[60%] text-[#E86D44]" strokeWidth={2.5} />
+const FingerprintBrandLogo = ({ className, noBorder = false }: { className?: string, noBorder?: boolean }) => (
+  <div className={`rounded-full flex items-center justify-center overflow-hidden z-20 relative ${noBorder ? '' : 'bg-[#1A1A1A] border-4 md:border-[6px] border-white shadow-sm'} ${className}`}>
+    <Fingerprint className={`w-[60%] h-[60%] text-[#E86D44]`} strokeWidth={2.5} />
   </div>
 );
 
-// --- COMPONENT: BIOMETRIC UNLOCK SPLASH ---
+// --- COMPONENT: PRECISION LENS SPLASH ---
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const [phase, setPhase] = useState<'idle' | 'scanning' | 'success' | 'exiting'>('idle');
+  const [phase, setPhase] = useState<'mount' | 'focus' | 'scan' | 'exit'>('mount');
 
   useEffect(() => {
     // REMOVE STATIC SPLASH IF EXISTS
     const staticSplash = document.getElementById('fail-safe-splash');
     if (staticSplash) {
-        staticSplash.style.transition = 'opacity 0.5s';
+        staticSplash.style.transition = 'opacity 0.2s';
         staticSplash.style.opacity = '0';
-        setTimeout(() => staticSplash.remove(), 500);
+        setTimeout(() => staticSplash.remove(), 200);
     }
 
-    // Sequence Timing
-    const scanTimer = setTimeout(() => setPhase('scanning'), 1000); // Start Scan after 1s
-    const successTimer = setTimeout(() => setPhase('success'), 2800); // Scan finishes
-    const exitTimer = setTimeout(() => setPhase('exiting'), 3500); // Trigger shockwave
-    const completeTimer = setTimeout(onComplete, 4200); // Unmount
+    // SEQUENCE TIMING
+    // 0ms: Mount (Blurred, Large)
+    
+    // 100ms: Focus (Snap to clear)
+    const focusTimer = setTimeout(() => setPhase('focus'), 100); 
+
+    // 800ms: Start Circle Draw
+    const scanTimer = setTimeout(() => setPhase('scan'), 800);
+
+    // 3200ms: Elevator Exit
+    const exitTimer = setTimeout(() => setPhase('exit'), 3200);
+
+    // 4000ms: Unmount
+    const completeTimer = setTimeout(onComplete, 4000);
 
     return () => {
+      clearTimeout(focusTimer);
       clearTimeout(scanTimer);
-      clearTimeout(successTimer);
       clearTimeout(exitTimer);
       clearTimeout(completeTimer);
     };
@@ -64,69 +72,51 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden transition-all duration-300`}
+      className={`fixed inset-0 z-[9999] bg-[#1A1A1A] flex flex-col items-center justify-center overflow-hidden will-change-transform transition-transform duration-[800ms] cubic-bezier(0.76, 0, 0.24, 1) ${phase === 'exit' ? '-translate-y-full' : 'translate-y-0'}`}
     >
-      {/* HEADER TEXT: VOUCHING... */}
-      <div className={`absolute top-12 left-0 w-full text-center transition-opacity duration-300 z-50 ${phase === 'exiting' ? 'opacity-0' : 'opacity-100'}`}>
-          <span className="font-mono text-[#E86D44] font-bold tracking-[0.5em] text-xs animate-pulse">
-              VOUCHING...
-          </span>
-      </div>
-
-      {/* BACKGROUND ELEMENTS */}
-      <div className={`absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#E86D44]/10 to-transparent opacity-0 transition-opacity duration-1000 ${phase !== 'idle' ? 'opacity-100' : ''}`}></div>
-      
-      {/* MAIN CONTAINER THAT WILL SHOCKWAVE */}
-      <div className={`relative flex flex-col items-center justify-center transition-transform duration-[800ms] cubic-bezier(0.7, 0, 0.3, 1) ${phase === 'exiting' ? 'scale-[50] opacity-0' : 'scale-100'}`}>
+      {/* MAIN CONTAINER */}
+      <div className="relative flex flex-col items-center justify-center">
           
           {/* LOGO WRAPPER */}
-          <div className="relative w-40 h-40 md:w-56 md:h-56">
+          <div className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
               
-              {/* Pulse Glow (Idle) */}
-              <div className={`absolute inset-0 bg-[#E86D44] rounded-full blur-2xl transition-all duration-1000 ${phase === 'idle' ? 'animate-pulse opacity-40 scale-110' : 'opacity-0 scale-100'}`}></div>
-              
-              {/* Success Burst (Success) */}
-              <div className={`absolute inset-0 bg-white rounded-full blur-xl transition-all duration-300 ${phase === 'success' ? 'opacity-80 scale-125' : 'opacity-0 scale-100'}`}></div>
+              {/* SCANNING RING */}
+              <svg className="absolute inset-[-24px] w-[calc(100%+48px)] h-[calc(100%+48px)] -rotate-90 pointer-events-none">
+                <circle
+                  cx="50%" cy="50%" r="48%"
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  className="transition-all duration-[1.5s] ease-in-out"
+                  strokeDasharray="300" 
+                  strokeDashoffset={phase === 'scan' || phase === 'exit' ? '0' : '300'}
+                  style={{ opacity: phase === 'mount' ? 0 : 0.8 }}
+                />
+              </svg>
 
-              {/* Central Logo */}
-              <FingerprintBrandLogo className="w-full h-full" />
-
-              {/* Scanning Overlay */}
-              {phase === 'scanning' && (
-                  <div className="absolute inset-0 z-30 rounded-full overflow-hidden">
-                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-transparent to-[#E86D44]/50 border-b-4 border-[#E86D44] animate-scan drop-shadow-[0_0_10px_#E86D44]"></div>
-                  </div>
-              )}
+              {/* CENTRAL LOGO */}
+              <div 
+                  className={`w-full h-full bg-[#1A1A1A] rounded-full flex items-center justify-center relative z-10 transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]
+                    ${phase === 'mount' ? 'scale-150 blur-md opacity-0' : 'scale-100 blur-0 opacity-100'}
+                  `}
+              >
+                  <FingerprintBrandLogo className="w-full h-full" noBorder={true} />
+              </div>
           </div>
 
-          {/* STATUS TEXT */}
-          <div className="mt-12 h-8 flex flex-col items-center justify-center overflow-hidden">
-             <div className="font-mono font-bold tracking-[0.2em] text-sm md:text-base transition-all duration-300">
-                {phase === 'idle' && (
-                   <span className="text-gray-500 animate-pulse">INITIALIZING SYSTEM...</span>
-                )}
-                {phase === 'scanning' && (
-                   <span className="text-[#E86D44]">BIOMETRIC SYNC: <span className="inline-block w-8 text-left animate-pulse">Running...</span></span>
-                )}
-                {(phase === 'success' || phase === 'exiting') && (
-                   <span className="text-white bg-[#7BC65C] text-[#1A1A1A] px-3 py-1 rounded-sm animate-in zoom-in duration-200">IDENTITY CONFIRMED</span>
-                )}
+          {/* TYPOGRAPHY */}
+          <div className="mt-8 h-12 overflow-hidden flex flex-col items-center">
+             <div 
+                className={`flex flex-col items-center transition-all duration-[1000ms] ease-out delay-300
+                    ${(phase === 'scan' || phase === 'exit') ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+                `}
+             >
+                <h1 className="text-white font-black text-2xl tracking-[0.4em] leading-none ml-2">VOUCH</h1>
+                <p className="text-[#E86D44] font-mono text-[10px] tracking-[0.3em] uppercase mt-2 opacity-80">System Ready</p>
              </div>
           </div>
       </div>
-
-      {/* CSS FOR SCAN LINE */}
-      <style>{`
-        @keyframes scan {
-          0% { transform: translateY(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(200%); opacity: 0; }
-        }
-        .animate-scan {
-          animation: scan 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-      `}</style>
     </div>
   );
 };
