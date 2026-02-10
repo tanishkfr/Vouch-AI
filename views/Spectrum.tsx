@@ -21,11 +21,12 @@ const DeepDiveCard: React.FC<{
                 {icon}
             </div>
             <div className={`px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-widest ${bg} text-[#1A1A1A]`}>
-                Level {title === 'THE KILL-SWITCH' ? '4' : title === 'THE AD-RISK' ? '3' : title === 'THE SPICY TAKE' ? '2' : '1'} Impact
+                Level {title.includes('KILL') ? '4' : title.includes('AD') ? '3' : title.includes('SPICY') ? '2' : '1'} Impact
             </div>
         </div>
 
-        <h3 className="text-4xl font-black text-[#1A1A1A] mb-2 uppercase tracking-tighter leading-none">{title}</h3>
+        {/* Updated Tracking to prevent space collapse */}
+        <h3 className="text-4xl font-black text-[#1A1A1A] mb-2 uppercase tracking-tight leading-none">{title}</h3>
         <p className="text-xl font-bold text-gray-500 mb-6 leading-tight">{desc}</p>
 
         {/* Why We Flag It */}
